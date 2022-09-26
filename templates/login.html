@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Login Page{% endblock %}
+ 
+{% block content %}
+
+<div id="login" class="container" style="width:25%;">
+  <div class="row-fluid">
+    <div class="span12">
+      <div class="login well well-small">
+
+        <h1>Login Page</h1>
+        <br>
+        <form action="" method="post" novalidate>
+        {{form.csrf_token}}
+          <div class="control-group">
+            <div class="input-prepend">
+              <span class="add-on"><i class="icon-user"></i></span>
+                {{form.username(class_="form-control",size=32, placeholder="Username")}}
+                {% for error in form.username.errors %}
+              <span style="color:red;">
+                {{error}}
+              </span>
+                {% endfor %}
+          </div>
+          </div>
+              <br/>
+                {{form.password(class_="form-control",size=32, placeholder="Password")}}
+                {% for error in form.password.errors %}
+              <span style="color:red;">
+                {{error}}
+              </span>
+                {% endfor %}
+              <br/>
+              <div class="control-group">
+                <input class="btn btn-primary btn-large btn-block" type="submit" value="Sign in">
+              </div>
+        </form>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+ 
+{% endblock %}
+

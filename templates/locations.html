@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% block title %}Manage Jobs Page{% endblock %}
+
+{% block content %}
+
+	<div class="row">
+		<div class="col md-10">
+			<div>
+		<h2>Manage Jobs</h2> <button type="button"  class="btn btn-success float-right" data-toggle="modal" data-target="#mymodal">Add New Location</button> </h2>
+
+	<table id="locationstable" class="table table-striped display no-wrap table-hover table-sm">
+      <thead>
+            <tr>
+               <th>Job #</th>
+               <th>Location</th>
+               <th>Address 1</th>
+               <th>City</th>
+               <th>State</th>
+               <th>Zip Code</th>
+               <th>Tax Rate</th>
+               <th>Action</th>
+               <th>Delete</th>
+            </tr>
+         </thead>
+      {% for row in locations %}
+                     <tr>
+                           <td>{{row.locationjobnumber}}</td>
+                           <td>{{row.locationname}}</td>
+                           <td>{{row.locationaddress}}</td>
+                           <td>{{row.locationcity}}</td>
+                           <td>{{row.locationstate}}</td>
+                           <td>{{row.locationzipcode}}</td>
+                           <td><b>{{row.locationtaxrate}} %</b></td>
+
+                           <td><a href="/updatelocation/{{row.id}}" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#modaledit{{row.id}}">Edit</a></td>
+                           <td><a href="/deletelocation/{{row.id}}" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Delete ?')">X</a></td>               
+   
+                     </tr>
+   
+   
+                  <!-- Modal Edit Location-->
+                  <div id="modaledit{{row.id}}" class="modal fade" role="dialog">
+                     <div class="modal-dialog">
+                           
+                        <div class="modal-content">
+                                     
+                           <div class="modal-header">
+                              <h4 class="modal-title">Update Information</h4> 
+                           </div>
+                   
+                   
+                           <div class="modal-body">                  
+                              <form action="{{url_for('updatelocation')}}" method="POST" autocomplete="off">             
+
+                                 <div class="form-group">
+                                    <label>Name:</label>
+                                    <input type="hidden"  name="id" value="{{row.id}}">
+                                    <input type="text" class="form-control" name="locationname" value="{{row.locationname}}">                
+                                 </div>
+                                 <div class="form-group">                  
+                                    <label>Client:</label>
+                                    <input type="text" class="form-control" name="locationclient" value="{{row.locationclient}}">
+                                 </div>    
+                                 <div class="form-group">                  
+                                    <label>Job #:</label>
+                                    <input type="text" class="form-control" name="locationjobnumber" value="{{row.locationjobnumber}}">
+                                 </div>    
+								         <div class="form-group">                  
+                                    <label>Company:</label>
+                                    <input type="text" class="form-control" name="locationcompany" value="{{row.locationcompany}}">
+                                 </div>                                         
+                                 <div class="form-group">                  
+                                    <label>Address</label>
+                                    <input type="text" class="form-control" name="locationaddress" value="{{row.locationaddress}}">
+                                 </div>   
+                                 <div class="form-group">                  
+                                    <label>City</label>
+                                    <input type="text" class="form-control" name="locationcity" value="{{row.locationcity}}">
+                                 </div>   
+                                 <div class="form-group">
+                                    <label>State</label>
+                                    <select name= locationstate class="form-control" method="GET" action="/">
+                                          <option value="{{row.locationstate}}" selected>{{row.locationstate}}</option>
+                                       {% for state in states %}
+                                          <option value="{{state}}">{{state}}</option>"
+                                       {% endfor %}
+                                    </select>
+                                 </div>
+                                 <div class="form-group">                  
+                                    <label>Zip Code</label>
+                                    <input type="text" class="form-control" name="locationzipcode" value="{{row.locationzipcode}}">
+                                 </div>
+            
+
+                                 <div class="input-group mb-3">
+                                    <label>Tax Rate:</label><br>
+                                    <input type="number" name="locationtaxrate" class="form-control" value="{{row.locationtaxrate}}" aria-describedby="basic-addon2" step="any">
+                                    <div class="input-group-append">
+                                      <span class="input-group-text" id="basic-addon2">%</span>
+                                    </div>
+                                  </div>
+
+                                 <div class="form-group">
+                                    <button class="btn btn-primary" type="submit">Update</button>
+                                 </div>               
+                   
+                              </form>
+                           </div>                
+                   
+                           <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>                              
+                           </div>                                    
+                        </div>                                     
+                     </div>                 
+                  </div>
+                   
+                                      {% endfor %}                          
+                                  </table>               
+                              </div>
+ 
+                  <!-- Modal Add Location-->
+ 
+                  <div id="mymodal" class="modal fade" role="dialog">
+                     <div class="modal-dialog">
+                        <div class="modal-content">
+                           <div class="modal-header">
+                   
+                              <h4 class="modal-title">Add Location</h4>
+                           </div>
+                           <div class="modal-body">
+                   
+                              <form action="{{url_for('insertlocation')}}" method="POST" autocomplete="off"> 
+
+                                 <div class="form-group">
+                                    <label>Name:</label>
+                                    <input type="hidden"  name="id" value="{{id}}">
+                                    <input type="text" class="form-control" name="locationname">                
+                                 </div>
+                                 <div class="form-group">                  
+                                    <label>Client:</label>
+                                    <input type="text" class="form-control" name="locationclient">
+                                 </div>    
+                                 <div class="form-group">                  
+                                    <label>Job #:</label>
+                                    <input type="text" class="form-control" name="locationjobnumber">
+                                 </div>  
+								         <div class="form-group">                  
+                                    <label>Company:</label>
+                                    <input type="text" class="form-control" name="locationcompany">
+                                 </div>                                         
+                                 <div class="form-group">                  
+                                    <label>Address</label>
+                                    <input type="text" class="form-control" name="locationaddress">
+                                 </div>   
+                                 <div class="form-group">
+                                    <label>State</label>
+                                    <select name= locationstate class="form-control" method="GET" action="/">
+                                       {% for state in states %}
+                                          <option value= "{{state}}" SELECTED>{{state}}</option>"
+                                       {% endfor %}
+                                    </select>
+                                 </div>
+                                 <div class="form-group">                  
+                                    <label>City</label>
+                                    <input type="text" class="form-control" name="locationcity">
+                                 </div>
+                                 <div class="form-group">                  
+                                    <label>Zip Code</label>
+                                    <input type="text" class="form-control" name="locationzipcode">
+                                 </div>  
+                                 <div class="input-group mb-3">
+                                    <label>Tax Rate:</label><br>
+                                    <input type="number" name="locationtaxrate" class="form-control" aria-describedby="basic-addon3" step="any">
+                                    <div class="input-group-append">
+                                      <span class="input-group-text" id="basic-addon3">%</span>
+                                    </div>
+                                  </div>            
+                   
+                                 <div class="form-group">              
+                                    <button class="btn btn-primary" type="submit">Add Location</button>                               
+                                 </div>                             
+                              </form>                             
+                           </div>
+                   
+                   
+                           <div class="modal-footer">            
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>                             
+                           </div>               
+                        </div>                                   
+                     </div>
+                   
+                   
+                  </div>                                                                     
+                          </div>                   
+                      </div>            
+
+ 
+ 
+{% endblock %}
+
+<!--Script for Databases.js-->
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+      $('#locationstable').DataTable({
+         "order": [],
+         columns: [
+         {orderable: false},
+         {orderable: false},
+         {orderable: false},
+         {orderable: false},
+         {orderable: false},
+		   {orderable: false},
+         {orderable: false},
+		   {orderable: false, searchable: false},
+		   {orderable: false, searchable: false}],
+      });
+    });
+  </script>
+{% endblock %}

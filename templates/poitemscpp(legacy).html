@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% block title %}PO SYSTEM{% endblock %}
+
+{% block content %}
+
+<!--VENDOR AND SHIPPING INFORMATION-->
+	<div class="row">
+		<div class="col md-10">
+			<div>
+
+            <div class="row">
+               <div class="col">
+
+                  <div class="row" style="float:right;">
+                     <div class="col col-md">
+                        <form action="mailto:email@example.com?subject=PO#{{po.ponumber}}%20{{po.povendor}}&attachment=c:\test\test.txt" method="POST"> 
+                           <div class="form-group">
+                           <input type="hidden"  name="id" value="{{po.id}}">
+                           <input type="hidden"  name="sendto" value="vendor">
+                           <button class="btn btn-danger" type="submit">Send PO Email</button>
+                           </div>
+                        </form>
+                        </div>
+                        <div class="col col-md">
+                           <form action="{{url_for('podownload')}}" method="POST"> 
+                              <div class="form-group">
+                              <input type="hidden"  name="id" value="{{po.id}}">
+                              <input type="hidden"  name="sendto" value="receiving">
+                              <button class="btn btn-danger" type="submit">Excecute PO</button>
+                              </div>
+                           </form>
+                        </div>
+                        <div class="col col-md">
+                           <form action="{{url_for('poreceiving')}}" method="POST"> 
+                              <div class="form-group">
+                              <input type="hidden"  name="id" value="{{po.id}}">
+                              <input type="hidden"  name="sendto" value="receiving">
+                              <button class="btn btn-danger" type="submit">Receiving pdf</button> 
+                              </div>
+                           </form>
+                        </div>
+                        <div class="col col-md">
+                           <form action="{{url_for('flatfilepoexport')}}" method="POST"> 
+                              <div class="form-group">
+                                 <input type="hidden" value="{{po.ponumber}}"  name="flatfileponumber" id="flatfileponumber">
+                                 <input type="hidden" value="{{po.potaxrate}}"  name="potaxrate" id="potaxrate">
+                                 <button class= "btn btn-success" type="submit">Generate FlatFile</button>
+                              </div>
+                           </form>
+                        </div>
+                  </div>
+
+                  <form class="form-group" action="{{url_for('poitemscp')}}" method="POST">    
+                     <div class="form-group"></div>
+                     <!--SUBMIT ON WTFORM SELECT CHANGE-->
+                     <b>JOB # </b>           
+                     {{form.bomjobnumber(**{"onchange":"this.form.submit()"})}}
+                     </div>
+                 </form>   
+
+                 <br>
+                 <form action="{{url_for('poitemscpposave')}}" method="POST" enctype="multipart/form-data">
+
+                  <div class="form-group">  
+                     <b>Creation Date:</b>
+                     <input type="date" name="pocreated" value="{{today}}">
+                  </div>
+                  <div class="form-group">
+                     <b>Required Date:</b>
+                     <input type="date">
+                  </div>
+                  <div class="form-group">
+                     <b>FOB</b>                 
+                     <input type="text" name="fob" value=""> 
+                  </div>   
+                  <div class="form-group">
+                     <b>PO #</b>                 
+                     <input type="text" name="ponumber" value={{po.ponumber}}> 
+                  </div>              
+                  <div class="form-group">
+                     <b>Vendor: </b>
+                     {{formpo.povendor(size=1)}}           
+                  </div>	
+              
+                      <!--VENDOR AND SHIPPING INFORMATION-->
+                     <div class="row">
+                        <div class="col">
+                           <b>Bill to: </b> <br> 
+                           <textarea id="billto" name="pobillto" rows="5" cols="50">Premier Plant Services, LLC&#13;&#10;2429 Industrical Rd&#13;&#10;Sapulpa,OK 74066-8335&#13;&#10;ap@premierps.com
+                           </textarea>
+                        </div>
+
+                        <div class="col">
+                           <b>Ship to: </b> <br>   
+                           <textarea id="location" name="displayship" rows="5" cols="50">{{shipto.locationname}}&#13;&#10;{{shipto.locationaddress}}&#13;&#10;{{shipto.locationcity}}, {{shipto.locationstate}} {{shipto.locationzipcode}}
+                           </textarea>
+                        </div>
+                     </div>
+                  <!--END OF VENDOR AND SHIPPING INFORMATION-->
+
+                  <input type="hidden" name="poshipto" value="{{shipto.locationname}}">
+                  <input type="hidden" name="pojob" value="{{pojob}}">
+                  <input type="hidden" name="poshipto" value="{{shipto.locationname}}">
+                                        
+                  </form>
+                  <div id="thetotals" style="float: right;">
+                     <span id="taxrate"><b>Tax Rate: {{po.potaxrate}} %</b></span>
+                  </div>
+               </div>
+
+            <div class="row">
+               <table class="table table-bordered table-striped table-hover table-sm" id="reloaded">
+                  <tr>
+                     <th></th>
+                     <th>QTY</th>
+                     <th>ITEM DESCRIPTION</th>
+                     <th>ITEM COST</th>
+                     <th>UOM</th>
+                     <th>TOTAL</th>
+                     <th></th>
+                  </tr>
+         
+                  
+                  {% set count = namespace(value=1) %}
+                  {% for row in poitems %}
+                     <!--ONLY SHOW ITEMS THAT MATCH WITH THE CURRENT PO-->
+                         
+                        <tr>
+                           <td style="text-align:center;">{{ count.value }}</td>
+                           <td style="text-align:center;" contenteditable="true">{{row.poitemquantity}}</td>
+                           <td contenteditable="true">{{row.poitemdescription}}</td>
+                           <td style="text-align:center;" contenteditable="true">$ {{row.poitemprice}}</td>
+                           <td style="text-align:center;" contenteditable="true">{{row.poitemunit}}</td>
+                           <td>$ {{row.poitemtotalprice}}</td>
+                           <td style="text-align:center;"><a href="/deletepoitemcpp/{{row.id}}" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Delete ?')">X</a></td>         
+                        </tr>
+                  {% set count.value = count.value + 1 %}
+                    
+                  {% endfor %}    
+
+
+                  {% for x in range(451-count.value) %}
+                  <tr>
+                     <td style="text-align:center;">{{ count.value }}</td>
+                     <td colspan="6">               
+                        <form action="{{url_for('poitemscpinsert')}}" method="POST" enctype="multipart/form-data">
+                           <input type="text" name="excelpaste" style="width:90%;" onchange="this.form.submit()">
+                           <input type="hidden" name="vendor" value="{{vendor.vendorname}}">
+                           <input type="hidden" name="nextpo" value="{{po.ponumber}}">
+                           <input type="hidden" name="id" value="{{po.id}}">
+                        </form>  
+                     </td>          
+                  </tr>
+                  {% set count.value = count.value + 1 %}
+
+                  {% endfor %}                          
+               </table>
+            </div>
+
+         </div>
+      </div>
+   </div>
+
+
+
+
+
+
+
+
+
+
+
+               <!--script to lock scroll position-->
+   <script>   
+        document.addEventListener("DOMContentLoaded", function(event) { 
+            var scrollpos = localStorage.getItem('scrollpos');
+            if (scrollpos) window.scrollTo(0, scrollpos);
+        });
+
+        window.onbeforeunload = function(e) {
+            localStorage.setItem('scrollpos', window.scrollY);
+        };
+   </script>
+ 
+{% endblock %}
+
+
+
+
+
+<!--Script for Databases.js-->
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+      $('#vendoritems').DataTable({
+         "order": [],
+         "scrollX": false,
+         "paging": false,
+          columns: [
+          {orderable: false},
+          {orderable: false},
+          {orderable: false, searchable: false},
+          {orderable: false, searchable: false},
+          {orderable: false, searchable: false},
+            ],
+      });
+    });
+  </script>
+{% endblock %}

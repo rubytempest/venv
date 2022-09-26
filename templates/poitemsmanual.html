@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+{% block title %}PO #{{po.ponumber}}{% endblock %}
+
+<script type="text/javascript">
+function FocusOnInput()
+{
+   document.getElementById("poitemquantity").focus()
+}
+</script>
+
+{% block content %}
+
+<!--VENDOR AND SHIPPING INFORMATION-->
+	<div class="row">
+		<div class="col md-10">
+			<div>
+
+            <div class="row">
+               <div class="col-md-auto">
+                  <h2>PO # {{po.ponumber}} Items for Job # {{po.pojob}}</h2>
+               </div>
+
+               <div class="col-md-auto">
+                  <!--Button to copy PO information-->
+                  {% if po.postatus != "In Progress" %}
+                     <div class=float-left>
+                        <a href="/copypo" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#modalcopy{{po.id}}">Copy PO</a>
+                     </div>
+                  {% endif %}
+                        <a href="/updatepo/{{po.id}}" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#modaledit{{po.id}}">Edit PO Information</a>
+               </div>
+            </div>
+
+               <div class="row">
+                  <!--VENDOR AND SHIPPING INFORMATION-->
+                  <div class="col-sm">
+                     <b>Vendor:</b> <br>
+                     {{po.povendor}} <br>
+                     {{vendor.vendoraddress1}}<br>
+                     {{vendor.vendorcity}} , {{vendor.vendorstate}} {{vendor.vendorzipcode}} <br>
+                     <b>Contact:</b>{{vendor.vendorcontact}} <b>Phone: </b> {{vendor.vendorphone}} <br>
+                     <b>Email: </b> {{vendor.vendormemail}} <br>
+                  </div>
+
+                  <div class="col-sm">
+                     <b>Ship to: </b> <br>   
+                     {{po.poshipto}} <br>
+                     {{shipto.locationaddress}}<br>
+                     {{shipto.locationcity}} , {{shipto.locationstate}} {{shipto.locationzipcode}} <br>
+                     <b>Contact:</b>{{buyer.name}} <b>Phone: </b> {{buyer.phone}} <br>
+                     <b>Email: </b> {{buyer.email}} <br>
+                  </div>
+                  <!--END OF VENDOR AND SHIPPING INFORMATION-->
+               </div>
+
+      <div class="row">
+
+         <!-- DISPLAY VENDOR ITEMS TO ADD TO PO TABLE -->
+         {%if po.postatus == "In Progress" or po.postatus =="Rejected" %}
+         
+         <form action="{{url_for('insertpoitemsmanual')}}" id="manual" method="POST" autocomplete="off">
+
+            <table id="vendoritems" class="table table-hover table-dark mb-0 table-sm" cellspacing="0" cellpadding="0" width="100%" >
+               <thead>
+                  <tr>
+                     <th>QTY</th>
+                     <th>Item Description</th>
+                     <th>Item Cost</th>
+                     <th>UOM</th>
+                     <th></th>
+                   
+                  </tr>
+               </thead>
+
+               <tr>
+                  <td><input type="text" class="form-control" id="poitemquantity" name="poitemquantity" form="manual" autofocus></td>
+                  <td><input type="text" class="form-control" name="poitemdescription" form="manual" placeholder="Item Description"></td>
+                  <td><input type="text" class="form-control" name="itemprice" form="manual"></td>
+                  <td><input type="text" class="form-control" name="itemunit" form="manual" placeholder="lb. case ft." onchange="this.form.submit()" autocomplete="off"></td>
+                  
+                  <input type="hidden" class="form-control" name="itempart" form="manual" placeholder="Part Number" value="###">
+
+                  <input type="hidden" class="form-control" name="itemcostcode" form="manual" placeholder="###" value="###">
+                  
+                  <td>
+                        <input type="hidden"  name="ponumber" value="{{po.ponumber}}" form="manual">
+                        <input type="hidden"  name="poitemskid" value="{{po.poskid}}" form="manual">
+                        <input type="hidden"  name="pocreated" value="{{po.pocreated}}" form="manual">
+                        <input type="hidden"  name="pojobtype" value="{{po.pojobtype}}" form="manual">
+                        <input type="hidden"  name="pojobtypenum" value="{{po.pojobtypenum}}" form="manual">
+                        <input type="hidden"  name="itemvendor" value="{{po.povendor}}" form="manual">
+                  </td>
+               </tr>
+
+ 
+            </table>
+
+            </form>
+         </div>
+{%endif%}
+
+
+            <!-- DISPLAY ITEMS ALREADY ADDED TO PO -->
+            <div class="row" id="here">
+            <h3 style="text-align:center;">Items in PO</h3>
+
+               <table class="table table-bordered table-striped table-hover table-sm" id="reloaded">
+               
+                     <tr>
+                        <th></th>
+                        <th>QTY</th>
+                        <th>Item Description</th>
+                        <th>Item Cost</th>
+                        <th>UOM</th>
+                        <th>TOTAL</th>
+                        <th></th>
+                     </tr>
+            
+                     {% set count = namespace(value=1) %}
+                     {% for row in poitems %}
+
+                     <!--ONLY SHOW ITEMS THAT MATCH WITH THE CURRENT PO-->
+                     {% if row.poitempo == po.ponumber %}     
+                                 <tr>
+                                       <td style="text-align:center;">{{ count.value }}</td>
+                                       <td style="text-align:center;">{{row.poitemquantity}}</td>
+                                       <td>{{row.poitemdescription}}</td>
+                                       <td>{{row.poitemprice}}</td>
+                                       <td>{{row.poitemunit}}</td>
+                                       <td style="text-align:center;">$ {{row.poitemtotalprice}}</td>
+                                       {%if po.postatus == "In Progress" or po.postatus == "Rejected" %}
+                                          <td><a href="/deletepoitemsmanual/{{row.id}}" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Delete ?')">X</a></td>               
+                                       {%else%}
+                                          <td></td>
+                                       {%endif%}
+                                 </tr>
+                                 {% set count.value = count.value + 1 %}
+                     {% endif %}
+              
+
+         
+
+                     {% endfor %}                          
+      </table>
+
+      <div id="thetotals" style="float: right;">
+         <span id="taxrate"><b>Tax Rate: {{po.potaxrate}} %</b></span>
+      </div>
+
+      <!--BUTTONS TO CHANGE PO STATUS-->
+
+      {%if po.postatus == "In Progress" or po.postatus == "Rejected" %}
+      <form action="{{url_for('updatepostatus')}}" method="POST"> 
+         <div class="form-group">
+          <input type="hidden"  name="id" value="{{po.id}}">
+          <input type="hidden"  name="postatus" value="Request for Approval">
+          <button class="btn btn-primary float-right" type="submit">Request for Approval</button>
+         </div>
+       </form>
+
+      {%elif po.postatus == "Request for Approval"%}
+
+      <form action="{{url_for('updatepostatus')}}" method="POST"> 
+         <div class="form-group">
+          <input type="hidden"  name="id" value="{{po.id}}">
+          <input type="hidden"  name="postatus" value="Approved">
+          <button class="btn btn-primary" type="submit">Approve</button>
+         </div>
+       </form>
+
+       <form action="{{url_for('updatepostatus')}}" method="POST"> 
+         <div class="form-group">
+          <input type="hidden"  name="id" value="{{po.id}}">
+          <input type="hidden"  name="postatus" value="Rejected">
+          <button class="btn btn-danger" type="submit">Reject</button>
+         </div>
+       </form>
+
+      {%elif po.postatus == "Approved"%}
+
+      <div class="row">
+         <div class="col col-md-2">
+         <form action="{{url_for('email')}}" method="POST"> 
+            <div class="form-group">
+            <input type="hidden"  name="id" value="{{po.id}}">
+            <input type="hidden"  name="sendto" value="vendor">
+            <button class="btn btn-danger" type="submit">Send Vendor Copy</button>
+            </div>
+         </form>
+         </div>
+         <div class="col col-md-3">
+         <form action="{{url_for('email')}}" method="POST"> 
+            <div class="form-group">
+            <input type="hidden"  name="id" value="{{po.id}}">
+            <input type="hidden"  name="sendto" value="receiving">
+            <button class="btn btn-danger" type="submit">Send Receiving Copy</button>
+            </div>
+         </form>
+         </div>
+         <div class="col">
+         <form action="{{url_for('updatepostatus')}}" method="POST"> 
+            <div class="form-group">
+            <input type="hidden"  name="id" value="{{po.id}}">
+            <input type="hidden"  name="postatus" value="Ordered">
+            <button class="btn btn-primary" type="submit">Mark PO as Ordered</button>
+            </div>
+         </form>
+         </div>
+      </div>
+      {%endif%}
+
+               </div>
+
+            </div>
+         </div>
+      </div>
+   </div>
+</div>
+
+                 
+
+
+
+ 
+{% endblock %}
+
+

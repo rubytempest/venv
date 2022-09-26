@@ -1,0 +1,13 @@
+Material TEst Reports shall acompany the material with the shipment or the material will be placed on HOLD until recept of same.
+
+All material shall be furnished using vendors from the "Approved Manufacturers List" as applicable.
+
+No China, No India, or Eastern Europe Materials are allowed.
+
+All Material Must be NACE Certified.
+
+All carbon steel material over (0.500") wall thickness must be CHARPY TESTED to - 20F.
+
+Each line item of the packing list shall contain a listing of all applicable heat numbers being supplied for that line item and supported by the material test report.
+
+For dual schedule material, Vendor to supply the larger wall thickness. ISTI will taper bore the fitting.

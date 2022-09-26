@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}Registration Page{% endblock %}
+ 
+{% block content %}
+
+
+<div id="login" class="container" style="width:25%;">
+  <div class="row-fluid">
+    <div class="span12">
+      <div class="login well well-small">
+        <h1>Registration Form</h1>
+      
+          <form action="" method="post" novalidate autocomplete="off">
+            {{form.csrf_token}}
+              <p>
+                {{form.username(class_="form-control",size=32,placeholder="Username")}}
+                {% for error in form.username.errors %}
+                <span style="color:red;">
+                    {{error}}
+                </span>
+                {% endfor %}
+              </p>
+
+              <p>
+                {{form.password(class_="form-control",size=32,placeholder="Password")}}
+                  {% for error in form.password.errors %}
+                <span style="color:red;">
+                    {{error}}
+                </span>
+                {% endfor %}
+              </p>
+
+              <p>
+                  {{form.name(class_="form-control",size=32,placeholder="Full Name")}}
+                  {% for error in form.name.errors %}
+                  <span style="color:red;">
+                      {{error}}
+                  </span>
+                  {% endfor %}
+              </p>
+
+                <p>
+                  {{form.company(class_="form-control",size=1,placeholder="Company")}}
+                  {% for error in form.company.errors %}
+                  <span style="color:red;">
+                      {{error}}
+                  </span>
+                  {% endfor %}
+                </p> 
+
+                <p>
+                  {{form.email(class_="form-control",size=32,placeholder="Email")}}
+                  {% for error in form.email.errors %}
+                  <span style="color:red;">
+                      {{error}}
+                  </span>
+                  {% endfor %}
+                </p>
+
+                <p>
+                  {{form.phone(class_="form-control",size=32,placeholder="Phone")}}
+                  {% for error in form.company.errors %}
+                  <span style="color:red;">
+                      {{error}}
+                  </span>
+                  {% endfor %}
+                </p>
+
+                <p>
+                  {{form.usertype(class_="form-control",size=32,placeholder="User Role")}}
+                  {% for error in form.usertype.errors %}
+                  <span style="color:red;">
+                      {{error}}
+                  </span>
+                  {% endfor %}
+                </p> 
+      
+              <p>
+                  <input type="submit" value="Register" class="btn btn-success">
+              </p>
+      
+          </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+{% block title %}Vendors List{% endblock %}
+
+{% block content %}
+
+   <div class="row">
+      <h2>Manage Vendors</h2> 
+      <div>
+         <button type="button"  class="btn btn-success float-right" data-toggle="modal" data-target="#mymodal">Add New Vendor</button>
+      </div>
+   </div>  
+
+   <table  id="vendorstable" class="table table-striped display no-wrap table-hover table-sm">
+         <thead>
+            <tr>
+               <th>Vendor</th>
+               <th>Vendor #</th>
+               <th>Address 1</th>
+               <th>City</th>
+               <th>State</th>
+               <th>Zip Code</th>
+               <th>Contact</th>
+               <th>Phone</th>
+               <th>Email</th>
+               <th>Tax Rate</th>
+               <th></th>
+               <th></th>
+            </tr>
+         </thead>
+
+         {% for row in vendors %}
+
+         <tr>
+               <td>{{row.vendorname}}</td>
+               <td>{{row.vendornumber}}</td>
+               <td>{{row.vendoraddress1}}</td>
+               <td>{{row.vendorcity}}</td>
+               <td>{{row.vendorstate}}</td>
+               <td>{{row.vendorzipcode}}</td>
+               <td>{{row.vendorcontact}}</td>
+               <td>{{row.vendorphone}}</td>
+               <td>{{row.vendormemail}}</td>
+               <td>{{row.vendortaxrate}} %</td>
+               <td><a href="/updatevendor/{{row.id}}" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#modaledit{{row.id}}">Edit</a></td>
+               <td><a href="/deletevendor/{{row.id}}" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Delete ?')">X</a></td>               
+         </tr>
+   
+   
+                  <!-- Modal to edit vendor -->
+                  <div id="modaledit{{row.id}}" class="modal fade" role="dialog">
+                     <div class="modal-dialog">
+                           
+                        <div class="modal-content">        
+                           <div class="modal-header">
+                              <h4 class="modal-title">Update Vendor Information</h4> 
+                           </div>
+                           <div class="modal-body">                  
+                              <form action="{{url_for('updatevendor')}}" method="POST" autocomplete="off">                  
+                                 <div class="form-group">
+                                    <label>Name:</label>
+                                    <input type="hidden"  name="id" value="{{row.id}}">
+                                    <input type="text" class="form-control" name="vendorname" value="{{row.vendorname}}">                
+                                 </div>                             
+                                 <br/>                 
+                                 <div class="form-group">                  
+                                    <label>Vendor #</label>
+                                    <input type="text" class="form-control" name="vendornumber" value="{{row.vendornumber}}" placeholder="V######" >
+                                 </div>  
+                                 <br/>               
+                                 <div class="form-group">                  
+                                    <label>Address 1</label>
+                                    <input type="text" class="form-control" name="vendoraddress1" value="{{row.vendoraddress1}}">
+                                 </div>   
+                                 <div class="form-group">                  
+                                    <label>Address 2</label>
+                                    <input type="text" class="form-control" name="vendoraddress2" value="{{row.vendoraddress2}}">
+                                 </div>  
+                                 <div class="row">
+                                    <div class="col">                  
+                                       <label>City</label>
+                                       <input type="text" class="form-control" name="vendorcity" value="{{row.vendorcity}}">
+                                    </div>   
+                                    <div class="form-group">
+                                       <label>State</label>
+                                       <select name= vendorstate class="form-control" method="GET" action="/">
+                                             <option value="{{row.vendorstate}}" selected>{{row.vendorstate}}</option>
+                                          {% for state in states %}
+                                             <option value="{{state}}">{{state}}</option>"
+                                          {% endfor %}
+                                       </select>
+                                    </div>  
+                                    <div class="col">                  
+                                       <label>Zip Code</label>
+                                       <input type="text" class="form-control" name="vendorzipcode" value="{{row.vendorzipcode}}">
+                                    </div>
+                                 </div>
+                                 <br>
+                                 <div class="form-group">                  
+                                    <label>Contact</label>
+                                    <input type="text" class="form-control" name="vendorcontact" value="{{row.vendorcontact}}">
+                                 </div>   
+                                 <div class="form-group">                  
+                                    <label>Phone</label>
+                                    <input type="tel" class="form-control" name="vendorphone" value="{{row.vendorphone}}">
+                                 </div>                      
+                                 <div class="form-group">
+                                    <label>Email:</label>
+                                    <input type="text" class="form-control" name="vendormemail" value="{{row.vendormemail}}">
+                                 </div>
+                                 <div class="input-group mb-3">
+                                    <label>Tax Rate:</label>
+                                    <input type="number" class="form-control" name="vendortaxrate" value="{{row.vendortaxrate}}" aria-describedby="basic-addon2" step="any">
+                                    <div class="input-group-append">
+                                      <span class="input-group-text" id="basic-addon2">%</span>
+                                    </div>
+                                  </div>
+                   
+                                 <div class="form-group">
+                                    <button class="btn btn-primary" type="submit">Update</button>
+                                 </div>               
+                   
+                              </form>
+                           </div>                
+                   
+                           <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>                              
+                           </div>                                    
+                        </div>                                     
+                     </div>                 
+                  </div>
+                   
+                   
+                                      {% endfor %}                          
+                                  </table>    
+                                  </div>             
+      </div>
+ 
+                  <!-- Modal Add Vendor-->
+
+                  <div id="mymodal" class="modal fade" role="dialog">
+                     <div class="modal-dialog">
+                        <div class="modal-content">
+                           <div class="modal-header">
+                   
+                              <h4 class="modal-title">Add Vendor</h4>
+                           </div>
+                           <div class="modal-body">
+                   
+                              <form action="{{url_for('insertvendor')}}" method="POST" autocomplete="off">           
+                                 <div class="form-group">
+                                    <label>Name:</label>
+                                    <input type="hidden"  name="id" value="{{id}}">
+                                    <input type="text" class="form-control" name="vendorname" value="" required>                
+                                 </div>                             
+                                 <div class="form-group">                  
+                                    <label>Vendor #:</label>
+                                    <input type="text" class="form-control" name="vendornumber" value="" required>
+                                 </div>               
+                                 <div class="form-group">                  
+                                    <label>Address 1</label>
+                                    <input type="text" class="form-control" name="vendoraddress1" value="" required>
+                                 </div>   
+                                 <div class="form-group">                  
+                                    <label>Address 2</label>
+                                    <input type="text" class="form-control" name="vendoraddress2">
+                                 </div>   
+                                 <div class="row">
+                                    <div class="col">                  
+                                       <label>City</label>
+                                       <input type="text" class="form-control" name="vendorcity">
+                                    </div>   
+                                    <div class="form-group">
+                                       <label>State</label>
+                                       <select name= vendorstate class="form-control" method="GET" action="/">
+                                          {% for state in states %}
+                                             <option value="{{state}}">{{state}}</option>"
+                                          {% endfor %}
+                                       </select>
+                                    </div>
+                                    <div class="col">                  
+                                       <label>Zip Code</label>
+                                       <input type="text" class="form-control" name="vendorzipcode">
+                                    </div>
+                                 </div>
+                                 <br>
+                                 <div class="form-group">                  
+                                    <label>Contact</label>
+                                    <input type="text" class="form-control" name="vendorcontact">
+                                 </div>   
+                                 <div class="form-group">                  
+                                    <label>Phone</label>
+                                    <input type="text" class="form-control" name="vendorphone" >
+                                 </div>                      
+                                 <div class="form-group">
+                                    <label>Email:</label>
+                                    <input type="text" class="form-control" name="vendormemail">
+                                 </div>
+                                 <div class="input-group mb-3">
+                                    <label>Tax Rate:</label>
+                                    <input type="number" name="vendortaxrate" class="form-control" aria-describedby="basic-addon2" step="any">
+                                    <div class="input-group-append">
+                                      <span class="input-group-text" id="basic-addon2">%</span>
+                                    </div>
+                                  </div>
+                       
+                                 <div class="form-group">              
+                                    <button class="btn btn-primary" type="submit">Add Vendor</button>                               
+                                 </div>                             
+                              </form>                             
+                           </div>
+                   
+                           <div class="modal-footer">            
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>                             
+                           </div>               
+                        </div>                                   
+                     </div>
+                   
+                   
+                  </div>
+      </div>        
+   </div>                   
+           
+ 
+ 
+{% endblock %}
+
+<!--Script for Databases.js-->
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+      $('#vendorstable').DataTable({
+         "order": [],
+         columns: [
+         {orderable: false},
+         {orderable: false},
+         {orderable: false},
+         {orderable: false},
+         {orderable: false},
+		   {orderable: false},
+         {orderable: false},
+		   {orderable: false, searchable: false},
+         {orderable: false},
+         null,
+         {orderable:false, searchable: false},
+		   {orderable: false, searchable: false}],
+      });
+    });
+  </script>
+{% endblock %}

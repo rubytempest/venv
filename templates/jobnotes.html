@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Job Notes{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+<div class="row">
+
+        <form class="form-group" action="{{url_for('jobredirect')}}" method="POST">    
+            <h2>Manage Job Notes</h2>
+            <b>{{form.locationjobnumber.label}}</b>
+            {{form.locationjobnumber(size=1,**{"onchange":"this.form.submit()"})}}
+        </form>
+            
+
+</div>
+
+<div class="row">
+    <div class="col">
+        <table id="jobnotes" class="table table-hover table-light mb-0 table-sm" cellspacing="0" cellpadding="0" width="100%" >
+            <thead>
+                <tr>
+                <th><b>Current Notes</b></th>
+                <th></th>
+                </tr>
+            </thead>
+            {% for row in notes %}
+            <tr>
+                <td>{{row.jobnotes}}</td>
+                <td style="text-align:center"><a href="/deletejobnotes/{{row.id}}" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Delete ?')">X</a></td>
+            </tr>
+            {%endfor%}
+            <tr>
+                <td><form class="form-group" action="{{url_for('addjobnotes')}}" method="POST">          
+                    <input type="hidden" name="jobnumber" value={{jobnumber}}>
+                    <div class="form-group">                  
+                        {%if jobnumber==""%}                  
+                            <input type="text" name="jobnotes" class="form-control" autocomplete="off" disabled>
+                        {%else%}
+                            <input type="text" name="jobnotes" class="form-control" autocomplete="off" autofocus>
+
+                        {%endif%}                    
+                    </div>
+                </form></td>
+                <td></td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="col">
+
+        <form class="form-group" action="{{url_for('addattachment')}}" method="POST" enctype="multipart/form-data">          
+            <input type="hidden" name="jobnumber" value={{jobnumber}}>
+            <button class="btn btn-warning" type="submit">ADD ATTACHMENT FILE</button>
+            {{form.hidden_tag()}}
+            {{form.csrf_token}}
+            {{form.locationattachment}}         
+        </form>
+
+        <table id="jobattachments" class="table table-hover table-dark mb-0 table-sm" cellspacing="0" cellpadding="0" width="100%" >
+            <thead>
+                <tr>
+                <th><b>Current Attachments</b></th>
+                <th></th>
+                </tr>
+            </thead>
+            {% for row in dir_list %}
+            <tr>
+                <td><a href="/downloadjobattachment/{{row}}/{{jobnumber}}">{{row}}</a></td>
+                <td style="text-align:center ;"><a href="/deletejobattachment/{{row}}/{{jobnumber}}" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Delete ?')">X</a></td>
+            </tr>
+            {%endfor%}
+
+        </table>
+
+    </div>
+</div>
+</div>
+{% endblock %}
+
+<!--Script for Databases.js-->
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+      $('#locationstable').DataTable({
+         "order": [],
+         columns: [
+         {orderable: false},
+         {orderable: false},
+         {orderable: false},
+         {orderable: false},
+         {orderable: false},
+		   {orderable: false},
+         {orderable: false},
+		   {orderable: false, searchable: false},
+		   {orderable: false, searchable: false}],
+      });
+    });
+  </script>
+{% endblock %}

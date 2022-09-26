@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+{% block title %}BOM Page{% endblock %}
+
+{% block content %}
+
+<div class="row">
+	<div class="col md-10">
+
+            <h1>BILL OF MATERIALS FOR JOB # {{pojob}}</h1>
+
+
+            <form action="{{url_for('bomredirect')}}" method="POST" enctype="multipart/form-data">                  
+                <b>Select Job# </b>{{form.bomjobnumber(**{"onchange":"this.form.submit()"})}}
+            </form> 
+
+            <div class="row" style="width:50%">
+                <label><b>REQUEST FOR QUOTE:</b></label>
+                <div class="col md-2">
+                    <form action="{{url_for('bomrequest')}}" method="POST" autocomplete="off"> 
+                        <input type="hidden" value="BOLT"  name="material" id="material">
+                        <input type="hidden" name="bomjobnumber" id="bomjobnumber" value="{{pojob}}">
+                        <button class= "btn btn-primary"type="submit">BOLTS</button>
+                    </form>
+                        </div>
+                        <div class="col md-2">
+                    <form action="{{url_for('bomrequest')}}" method="POST" autocomplete="off"> 
+                        <input type="hidden" value="GASKET"  name="material" id="material">
+                        <input type="hidden" name="bomjobnumber" id="bomjobnumber" value="{{pojob}}">
+                        <button class= "btn btn-primary"type="submit">GASKETS</button>
+                    </form>
+                        </div>
+                        <div class="col">
+                    <form action="{{url_for('bomrequest')}}" method="POST" autocomplete="off"> 
+                        <input type="hidden" value="FITTING"  name="material" id="material">
+                        <input type="hidden" name="bomjobnumber" id="bomjobnumber" value="{{pojob}}">
+                        <button class= "btn btn-primary"type="submit">PIPE & FITTINGS</button>
+                    </form>
+                        </div>
+                        <div class="col">
+                    <form action="{{url_for('bomrequest')}}" method="POST" autocomplete="off"> 
+                        <input type="hidden" value="FLANGE"  name="material" id="material">
+                        <input type="hidden" name="bomjobnumber" id="bomjobnumber" value="{{pojob}}">
+                        <button class= "btn btn-primary"type="submit">STEEL</button>
+                    </form>
+                </div>
+            </div>
+            
+            <br>
+
+            <div class="row">
+                <br>
+                <div class="col">
+                <form action="{{url_for('bom_pdf')}}" method="POST" autocomplete="off"> 
+                    <div class="form-group">
+                        <label>MATERIAL TO CREATE PO: </label>
+                        <input type="text"  name="material" id="material">
+                        <input type="hidden" name="bomjobnumber" id="bomjobnumber" value="{{pojob}}">
+                        <button class= "btn btn-primary"type="submit">Generate PDF Preview</button>
+                    </div>
+                </form>
+                </div>
+                <div class="col">
+                <button type="button"  class="btn btn-success" data-toggle="modal" data-target="#excelupload">Import BOM .xlsx File</button>
+                </div>
+            </div>
+
+            <div class="row">
+                <div id="fittings">
+                <!--    <li class="btn"><a href="#" class="all">All</a></li>   -->
+                    <input type="checkbox" name="fit" value="BUSHING">Bushings
+                    <input type="checkbox" name="fit" value="CAP">Caps
+                    <input type="checkbox" name="fit" value="COUPLING">Couplings
+                    <input type="checkbox" name="fit" value="CROSSES">Crosses
+                    <input type="checkbox" name="fit" value="ELBOW">Elbows
+                    <input type="checkbox" name="fit" value="NIPPLE">Nipples
+                    <input type="checkbox" name="fit" value="REDUCER">Reducers
+                    <input type="checkbox" name="fit" value="TEE">Tees
+                    <input type="checkbox" name="fit" value="STUB END">Stub Ends
+                    <input type="checkbox" name="fit" value="SWAGE NIPPLE">Swage Nipples
+                    <input type="checkbox" name="fit" value="UNION">Unions
+                    <input type="checkbox" name="fit" value="180 BEND">180 Bends
+                    <input type="checkbox" name="fit" value="PIPE">Pipes
+                    <input type="checkbox" name="fit" value="OUTLET">Outlets
+                </div>
+            </div>
+
+
+            <table id="data" class="table table-striped display no-wrap table-hover table-sm">
+                <thead>
+                    <tr>
+                        <th>Line Number</th>
+                        <th>Size</th>
+                        <th style="text-align: center;">QTY</th>
+                        <th>Desciption</th>
+                        <th>Tag</th>
+                        <th>UoM</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                {% for row in bom %}
+                    {% if row.bomstatus == "RFQ" %}
+                        <tr class="table-warning">
+                    {% else %}
+                        <tr>
+                    {%endif%}
+                    <td>{{row.bomlinenumber}}</td>
+                    <td>{{row.bomsize}}</td>
+                    <td style="text-align:center;">{{row.bomquantity}}</td>
+                    <td>{{row.bomdescription}}</td>
+                    <td>{{row.bomtag}}</td>
+                    <td>{{row.bomunit}}</td>
+                    <td>{{row.bomstatus}}</td>
+                 </tr>      
+                {% endfor %}
+                                                       
+            </table>               
+
+
+
+            <!-- Modal To Upload BOM EXCEL File -->
+            <div id="excelupload" class="modal fade" role="dialog">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h4 class="modal-title">Upload .xlsx Item List</h4>
+                        </div>
+                    <div class="modal-body">                  
+                        <form action="{{url_for('bomread')}}" method="POST" enctype="multipart/form-data">                
+                                {{form.hidden_tag()}}
+                                {{form.csrf_token}}
+                                {{form.bomfile.label}}
+                                {{form.bomfile}}
+                                <br>
+                                {{form.bomjobnumber.label}}
+                                {{form.bomjobnumber}}
+                            <div class="form-group">
+                                <button class="btn btn-primary" type="submit">Submit Item List</button>
+                            </div>          
+                        </form>                             
+                    </div>
+                    <div class="modal-footer">            
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>                             
+                    </div>    
+
+                    </div>                                   
+                </div>			  
+            </div>  
+            <!--End of Upload BOM EXCEL File Modal-->
+
+
+    </div>
+</div>
+ 
+{% endblock %}
+
+
+<!--Script for Databases.js-->
+{% block scripts %}
+<!--Filter multiplecheckboxes only exact match-->
+<script>
+$(document).ready( function () {
+  $.fn.dataTable.ext.search.push(
+    function( settings, searchData, index, rowData, counter ) {
+      var positions = $('input:checkbox[name="fit"]:checked').map(function() {
+        return this.value;
+      }).get();
+   
+      if (positions.length === 0) {
+        return true;
+      }
+      
+      if (positions.indexOf(searchData[6]) !== -1) {
+        return true;
+      }
+      
+      return false;
+    }
+  );
+
+  var table = $('#data').DataTable({
+		"order": [],
+        "scrollX": false,
+        "paging": false,
+        columns: [
+          null,
+          {orderable: false, searchable: false},
+          {ordenable: false, searchable: false},
+          null,
+          {orderable: false, searchable: false},
+		  {orderable: false, searchable: false},
+          {orderable: false, searchable: true, visible:false}],
+      });
+  
+ $('input:checkbox').on('change', function () {
+    table.draw();
+ });
+
+} );
+
+    //$('ul').on('click', 'a.all', function() {
+    //    table
+    //        .search('')
+    //        .columns(1)
+    //        .search('')
+    //        .draw();
+    //});
+
+  </script>
+
+
+{% endblock %}

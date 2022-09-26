@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% block title %}FlatFile Page{% endblock %}
+
+{% block content %}
+
+<div class="row">
+	<div class="col md-10">
+		<div>
+			<h2>FlatFile</h2> 
+            <!--CODE FOR DATE RANGE FILTER-->
+			<table border="0" cellspacing="5" cellpadding="5">
+				<tr>
+					<td><form action="flatfile/export" method="POST" autocomplete="off" class="form-inline"> 
+						<div class="form-group">
+							<label>Flatfile Date Request: </label>
+							<input class="form-control" type="date"  name="flatfiledate" id="flatfiledate">
+							<button class= "btn btn-primary" type="submit">Export CSV</button>
+						</div>
+					</form></td>
+				</tr>
+			</tbody></table>
+
+			<table id="data" class="table table-striped display no-wrap table-hover table-sm mb-2">
+			<thead>
+				<tr>
+					<th>Vendor</th>
+					<th>Job</th>
+					<th>Date</th>
+                    <th>PO #</th>
+					<th>Item</th>
+					<th>Description</th>
+					<th>Qty</th>
+					<th>Rate</th>
+					<th>Unit</th>
+                    <th>Amount</th>
+                    <th>Tax</th>
+                    <th></th>
+                    <th>Job</th>
+                    <th></th>
+                    <th>Item</th>
+				</tr>
+			</thead>
+			{% for row in poitems %}
+				<tr>
+					<td>{{row.poitemvendor}}</td>
+					<td>{{row.poitemjobtype}}</td>
+					<td>{{row.poitemdate}}</td>    
+					<td>{{row.poitempo}}</td>
+                    <td>{{row.poitemjobtypenumber}}{{row.poitemcostcode}}</td>
+					<td>{{row.poitemdescription}}</td>
+					<td>{{row.poitemquantity}}</td>
+					<td>$ {{row.poitemprice}}</td>
+                    <td>{{row.poitemunit}}</td>
+					<td>${{row.poitemtotalprice}}</td>
+					<td>pending tax 5%</td>
+					<td></td>
+                    <td>{{row.poitemjobtype}}</td>
+                    <td style="text-align: right;">{{row.poitemjobtypenumber}}</td>
+                    <td>{{row.poitemcostcode}}</td>
+                </tr>			  
+			{% endfor %}					                       
+			</table>               
+		</div>			 
+	</div>                   
+</div>            
+{% endblock %}
+
+
+<!--Script for Databases.js-->
+{% block scripts %}
+<script>
+
+var minDate, maxDate;
+ 
+ // Custom filtering function which will search data in column four between two values
+	$.fn.dataTable.ext.search.push(
+		function( settings, data, dataIndex ) {
+			var min = minDate.val();
+			var max = maxDate.val();
+			var date = new Date( data[2] );
+	
+			if (
+				( min === null && max === null ) ||
+				( min === null && date <= max ) ||
+				( min <= date   && max === null ) ||
+				( min <= date   && date <= max )
+			) {
+				return true;
+			}
+			return false;
+		}
+	);
+
+    $(document).ready(function () {
+
+		// Create date inputs
+		minDate = new DateTime($('#min'), {
+        format: 'DD/MM/YYYY'
+    	});
+    	maxDate = new DateTime($('#max'), {
+        	format: 'DD/MM/YYYY'
+    	});
+
+		//Initialize DataTable
+			var table = $('#data').DataTable({
+				"paging": false,
+				"ordering": false,
+				columns: [
+				null,
+				{searchable: false},
+				null,
+				null,
+				null,
+				null,
+				{orderable: false},
+				{searchable: false},
+				{orderable: false, searchable: false},
+				{searchable: false},
+				{orderable: false, searchable: false},
+				{orderable: false, searchable: false},
+				{orderable: false, searchable: false},
+				{orderable: false, searchable: false},
+				{orderable: false, searchable: false}],
+			});
+
+
+
+	    // Refilter the table
+			$('#min, #max').on('change', function () {
+        	table.draw();
+   		 });
+	});
+  </script>
+{% endblock %}
+
+<!--End of Script for Databases.js-->

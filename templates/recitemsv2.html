@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Receiving Items for {{po.ponumber}}{% endblock %}
+
+{% block content %}
+
+<!--VENDOR AND SHIPPING INFORMATION-->
+	<div class="row">
+		<div class="col md-10">
+			<div>
+
+            <div class="row">
+               <div class="col-md-auto">
+                  <h2>PO # {{po.ponumber}} Items for Job # {{po.pojob}}</h2>
+               </div>
+            </div>
+
+               <div class="row">
+                  <!--VENDOR AND SHIPPING INFORMATION-->
+                  <div class="col-sm">
+                     <b>Vendor:</b> <br>
+                     {{po.povendor}} <br>
+                     {{vendor.vendoraddress1}}<br>
+                     {{vendor.vendorcity}} , {{vendor.vendorstate}} {{vendor.vendorzipcode}} <br>
+                     <b>Contact:</b>{{vendor.vendorcontact}} <b>Phone: </b> {{vendor.vendorphone}} <br>
+                     <b>Email: </b> {{vendor.vendormemail}} <br>
+                  </div>
+
+                  <div class="col-sm">
+                     <b>Ship to: </b> <br>   
+                     {{po.poshipto}} <br>
+                     {{shipto.locationaddress}}<br>
+                     {{shipto.locationcity}} , {{shipto.locationstate}} {{shipto.locationzipcode}} <br>
+                     <b>Contact:</b>{{buyer.name}} <b>Phone: </b> {{buyer.phone}} <br>
+                     <b>Email: </b> {{buyer.email}} <br>
+                  </div>
+                  <!--END OF VENDOR AND SHIPPING INFORMATION-->
+               </div>
+
+      <div class="row">
+
+            <!-- DISPLAY ITEMS ALREADY ADDED TO PO -->
+            <div class="col-sm" id="here">
+            <h3 style="text-align:center;">Items in PO</h3>
+            <form action="{{url_for('insertallrecitemsv2')}}" method="POST" enctype="multipart/form-data">
+                <input type="hidden"  name="ponumber" value="{{po.ponumber}}">                 
+                <button class="btn btn-primary" type="submit">Mark All Items As Received</button>
+            </form>   
+               <table class="table table-bordered table-striped table-hover table-sm" id="reloaded">
+               
+                     <tr>
+                        <th></th>
+                        <th>Part No.</th>
+                        <th>Item</th>
+                        <th style="text-align:center;">QTY</th>
+                        <th>Rec</th>
+                     </tr>
+            
+                    {% set count = namespace(value=1) %}
+                    {% for row in poitems %}
+
+                        <!--ONLY SHOW ITEMS THAT MATCH WITH THE CURRENT PO-->
+                        {% if row.poitempo == po.ponumber %}
+                            {% if po.postatus != "Ordered" and row.poitemquantity != row.poreceivedqty %}     
+                            <tr>
+                                <td style="text-align:center;">{{ count.value }}</td>
+                                <td>{{row.poitemtag}}</td>
+                                <td>{{row.poitemdescription}}</td>
+                                <td style="text-align:center;">{{row.poitemquantity}}</td>
+                                <td>
+                                    <form action="{{url_for('insertsinglerecitemsv2')}}" method="POST" enctype="multipart/form-data">
+                                        <input type="hidden"  name="id" value="{{row.id}}">
+                                        <input type="hidden"  name="ponumber" value="{{po.ponumber}}">
+                                        <input type="number" class="form-control" name="poreceivedqty" value="{{row.poreceivedqty}}" onchange="this.form.submit()"/> 
+                                    </form>
+                                </td>
+                            </tr>
+                            {% set count.value = count.value + 1 %}
+                            {% elif po.postatus == "Received" or po.postatus == "Ordered" %}
+                            <tr>
+                                <td style="text-align:center;">{{ count.value }}</td>
+                                <td>{{row.poitemtag}}</td>
+                                <td>{{row.poitemdescription}}</td>
+                                <td style="text-align:center;">{{row.poitemquantity}}</td>
+                                <td>
+                                    <form action="{{url_for('insertsinglerecitemsv2')}}" method="POST" enctype="multipart/form-data">
+                                        <input type="hidden"  name="id" value="{{row.id}}">
+                                        <input type="hidden"  name="ponumber" value="{{po.ponumber}}">
+                                        <input type="number" class="form-control" name="poreceivedqty" value="{{row.poreceivedqty}}" onchange="this.form.submit()"> 
+                                    </form>
+                                </td>
+                            </tr>
+                            {% set count.value = count.value + 1 %}
+
+                            {%endif%}
+                        {% endif %}
+
+                    {% endfor %}                          
+                    </table>
+               </div>
+
+    <div>
+        <form action="{{url_for('markreceived')}}" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <input type="hidden"  name="id" value="{{po.id}}">
+                <input type="hidden"  name="postatus" value="Received">
+                {{form.hidden_tag()}}
+                {{form.csrf_token}}
+                {{form.receivingfile}}
+                <button class="btn btn-primary float-right" type="submit">Mark PO as Received</button>
+            </div>
+        </form>
+    </div>
+
+
+   </div>
+
+
+         </div>
+
+
+      </div>
+
+
+
+
+      </div>
+
+
+
+
+
+
+               
+</div>
+                 
+
+
+
+ 
+{% endblock %}
+

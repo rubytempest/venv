@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+{% block title %}PO List{% endblock %}
+
+{% block content %}
+
+
+
+	<div class="row">
+		<div class="col md-10">
+			<div>
+
+            <h2>Manage Purchase Orders</h2>
+
+               <button type="button"  class="btn btn-success float-right" data-toggle="modal" data-target="#mymodal">Add New PO</button> 
+               <br> </br>
+    
+
+	         <table class="table table-striped display no-wrap table-hover" id="data">
+               <thead>
+                  <tr>
+                     <th>JOB #</th>
+                     <th>PO #</th>
+                     <th>Placed</th>
+                     <th>Vendor</th>
+                     <th>Ship to</th>
+                     <th><center>Status</center></th>
+                     <th></th>
+                     <th></th>
+                     <th></th>
+                  </tr>
+               </thead>
+
+
+               {% for row in pos %}
+
+               <!--Filter to only show POs created by the current user-->
+                  {% if row.pocreatedby == current_user.name %}
+                  {% if row.postatus != "Backorder" %}
+
+                  <tr>
+                     <td>{{row.pojob}}</td>
+                     <td><b>{{row.ponumber}}</b></td>
+                     <td>{{row.pocreated}}</td>
+                     <td>{{row.povendor}}</td>
+                     <td>{{row.poshipto}}</td>
+
+                        {%if row.postatus == "Approved"%}
+                           <td><p style="color:green; text-align: center;">{{row.postatus}}</p></td>
+                           <td></td>
+                        {%elif row.postatus == "Request for Approval"%}
+                           <td><p style="color:blue; text-align: center;">{{row.postatus}}</p></td>
+                           <td></td>                     
+                        {%elif row.postatus == "Rejected"%}
+                           <td><p style="color:red; text-align: center;">{{row.postatus}}</p></td>
+                           <td></td>  
+                        {%elif row.postatus == "Ordered"%}
+                           <td><p style="color:orange; text-align: center;">{{row.postatus}}</p></td>
+                           <td></td>
+                        {%else%}
+                           <td><p style="text-align: center;">{{row.postatus}}</p></td>
+                           <td></td>      
+                        {%endif%}
+
+
+                     <!--Edit/Review PO Buttons-->
+                     {%if row.postatus == "Approved"%}
+                        <td><a href="/poitemsv2/{{row.ponumber}}" class="btn btn-warning btn-xs">Issue PO</a></td>
+                     {%elif row.postatus == "Request for Approval"%}
+                        <td><a href="/poitemsv2/{{row.ponumber}}" class="btn btn-warning btn-xs">Review PO</a></td>
+                     {%elif row.postatus == "In Progress" or row.postatus == "Rejected"%}
+                        <td><a href="/poitemsv2/{{row.ponumber}}" class="btn btn-warning btn-xs">Edit PO</a></td>
+                     {%elif row.postatus == "Ordered"%}
+                        <td><a href="/poitemsv2/{{row.ponumber}}" class="btn btn-warning btn-xs">View PO</a></td>
+                     {%elif row.postatus == "REQUEST FOR QUOTE"%}
+                        <td><a href="/bomitemsv2/{{row.ponumber}}" class="btn btn-warning btn-xs">View PO</a></td>
+                     {%else%}
+                        <td></td>
+                     {%endif%}
+
+                     <!--Delete PO Button-->   
+                     {%if row.postatus == "In Progress"%}
+                        <td><a href="/deletepo/{{row.id}}" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Delete ?')">X</a></td>
+                     {%else%}
+                        <td></td>
+                     {%endif%}  
+                            
+                  </tr>
+   
+                  <!-- Modal Edit Purchase Order-->
+                  <div id="modaledit{{row.id}}" class="modal fade" role="dialog">
+                     <div class="modal-dialog">
+                        <div class="modal-content">         
+                           <div class="modal-header">
+                              <h4 class="modal-title">Update Information</h4> 
+                           </div>
+                           <div class="modal-body">                  
+                              <form action="{{url_for('updatepo')}}" method="POST" autocomplete="off">                  
+                                 <div class="form-group">
+                                    <input type="hidden"  name="id" value="{{row.id}}">
+                                    <div class="form-group">                  
+                                       <label for="pojob">Job #</label>
+                                       <select id="pojob" class="form-control" name="pojob" value="{{row.pojob}}">
+                                          <option value="1456">#1456</option>
+                                          <option value="2784">#2784</option>
+                                          <option value="3995">#3992</option>
+                                          <option value="1337">#1337</option>
+                                          <option value="9715">#9715</option>
+                                          <option value="5588">#5588</option>
+
+                                       </select>             
+                                    </div>                                           
+                                    {{form.poskid.label}}
+                                    {{form.poskid(class_="form-control", value=row.poskid)}}
+                                 <br/>                 
+                                    {{form.poacccode.label}}
+                                    {{form.poacccode(class_="form-control", data=row.poacccode, size=1)}}
+                                 <br/>                 
+                                    {{form.poshipto.label}}
+                                    {{form.poshipto(class_="form-control", value=row.poshipto)}}
+                                 <br/>                 
+                                    {{form.popayment.label}}
+                                    {{form.popayment(class_="form-control", size=1)}} 
+                                <br/>                                    
+                   
+                                 <div class="form-group">
+                                    <button class="btn btn-primary" type="submit">Update</button>
+                                 </div>               
+                              </form>
+                           </div>                
+                   
+                           <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>                              
+                           </div>                                    
+                        </div>                                     
+                     </div>                 
+                  </div>
+                  <!--End of Modal to Edit PO-->
+
+                  {%endif%}
+                  {% endif %}
+            {% endfor %}                          
+            </table>   
+
+         </div>
+ 
+                  <!-- Modal Add Purchase Order-->
+                  <div id="mymodal" class="modal fade" role="dialog">
+                     <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                           <div class="modal-header">
+                              <h4 class="modal-title">Add Purchase Order</h4>
+                           </div> 
+                           
+                           <div class="modal-body">                  
+                              <form action="{{url_for('insertpo')}}" method="POST" autocomplete="off">                  
+                                 <div class="form-group">
+                                    <input type="hidden"  name="id" value="{{id}}">
+                                 </div>
+                                    <div class="row">
+           
+                                       {{form.pojob.label}}
+                                       {{form.pojob(class_="form-control", size=1)}}
+
+                                       
+                                       <div class="col">
+                                          <div class="form-group">                  
+                                          
+                                             <input type="hidden" class="form-control" name="ponumber" value={{nextpo}} required>
+                                          </div>  
+                                       </div> 
+
+                                    </div>             
+                                          {{form.poskid.label}}
+                                          {{form.poskid(class_="form-control", size=3)}}
+                                       <br/>         
+                                          {{form.poacccode.label}}
+                                          {{form.poacccode(class_="form-control", size=1)}}              
+                                       <br/>                 
+                                          {{form.pocreated.label}}
+                                          {{form.pocreated(class_="form-control", size=32)}}                
+                                          <input type="hidden"  name="pobuyer" value="{{buyer.name}}">
+                                       <br/>   
+                                          {{form.povendor.label}}
+                                          {{form.povendor(class_="form-control", size=1)}}
+                                       <br/>           
+                                          {{form.pojobtype.label}}
+                                          {{form.pojobtype(class_="form-control", size=1)}}
+                                       <br/>              
+                                          {{form.poshipto.label}}
+                                          {{form.poshipto(class_="form-control", size=1)}}
+                                       <br/>                   
+                                          {{form.popayment.label}}
+                                          {{form.popayment(class_="form-control", size=1)}}
+                                       <br/>                                     
+                                 </div> 
+
+                                 <div class="form-group"> 
+                                    <fieldset>
+                                       <label>Select Input Method</label>
+                                          <div class="form-control">
+                                             <input type="radio" name="inputtype" value="auto" checked>
+                                             <label>Auto</label>
+                                          </div>
+                                          <div class="form-control">
+                                             <input type="radio" name="inputtype" value="manual">
+                                             <label>Manual</label>
+                                          </div>
+                                    </fieldset>                
+
+                                 </div>  
+
+
+                                 <div class="modal-footer">
+                                    <div class="form-group">              
+                                       <button class="btn btn-primary" type="submit">Add Items to PO</button>                               
+                                    </div>                 
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>                             
+                                 </div> 
+                        
+                           </form>>       
+
+                     </div>
+
+              
+                  </div>  
+
+                     </div>   
+                  </div>                                                                     
+      </div>                   
+   </div>            
+
+{% endblock %}
+
+<!--Script for Databases.js-->
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+      $('#data').DataTable({
+		"order": [],
+        columns: [
+         null,
+         null,
+         null,
+         null,
+		   null,
+         null,
+		   {orderable: false, searchable: false},
+         {orderable: false, searchable: false},
+		   {orderable: false, searchable: false}],
+      });
+    });
+  </script>
+
+
+{% endblock %}

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <style>
+            table, td, th {
+            border: 1px solid;
+            }
+
+            table {
+            width: 100%;
+            border-collapse: collapse;
+            }
+        </style>
+    </head>
+<body>
+
+<table style="height: 1584px; width: 1385px;">
+    <tbody>
+    <tr>
+        <td style="width: 2653.23px;" colspan="11">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td>
+    </tr>
+    <tr>
+        <td>{{bomjobnumber}}</td>
+        <td></td>
+        <td>Ship To:</td>
+        <td>ISTI Plant Services: 5555 North Bird Creek Catoosa Oklahoma 74015</td>
+        <td></td>
+        <td></td>
+
+    </tr>
+    <tr>
+        <td>{{today}}</td>
+        <td></td>
+        <td>Rev:0</td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td></td>
+    </tr>
+    <tr>
+        <td style="width: 33px;" bgcolor="lightgray"><strong>Item</strong></td>
+        <td style="width: 100px;" bgcolor="lightgray"><strong>Qty.</strong></td>
+        <td style="width: 1831.23px;" bgcolor="lightgray"><strong>&nbsp;Material Description</strong></td>
+        <td style="width: 131px;" bgcolor="lightgray"><strong>Price</strong></td>
+        <td style="width: 104px; text-align:center;" bgcolor="lightgray"><strong>UoM</strong></td>
+        <td style="width: 81px;" bgcolor="lightgray"><strong>Total</strong></td>
+    </tr>
+
+       <!--ADDING NOTES TO PO REPORT-->
+       {% for row in notes %}
+       <tr>
+           <td></td>
+           <td></td>
+           <td style="width: 1831.23px;"><b>{{row.jobnotes}}</b></td>
+           <td></td>
+           <td></td>
+           <td></td>
+           <td style="width: 254px;"></td>
+       </tr>
+       <tr>
+           <td style="width: 33px;">&nbsp;</td>
+           <td style="width: 104px;">&nbsp;</td>
+           <td style="width: 1831.23px;">&nbsp;</td>
+           <td style="width: 219px;">&nbsp;</td>
+           <td style="width: 131px;">&nbsp;</td>
+           <td style="width: 81px;">&nbsp;</td>
+           <td style="width: 254px;">&nbsp;</td>
+       </tr>
+       {%endfor%}
+
+       {% for i in range(trueqty) %}
+       <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 219px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+        <td style="width: 254px;">&nbsp;</td>
+        </tr>
+        <tr>
+            <td style="width: 33px;">&nbsp;</td>
+            <td style="width: 104px;">&nbsp;</td>
+            <td style="width: 1831.23px;">&nbsp;</td>
+            <td style="width: 219px;">&nbsp;</td>
+            <td style="width: 131px;">&nbsp;</td>
+            <td style="width: 81px;">&nbsp;</td>
+            <td style="width: 254px;">&nbsp;</td>
+        </tr>
+       {%endfor%}
+
+    <!-- FILLING REPORT WITH PO PRODUCTS -->
+    {% set count = namespace(value=1) %}
+    {% for row in bom %}
+        <!--ONLY SHOW ITEMS THAT MATCH WITH THE CURRENT PO-->
+
+        <tr>
+            <td style="width: 33px; text-align: center;">{{ count.value }}</td>
+            <td style="width: 100px; text-align: center;">{{qtotals[count.value-1]}}</td>
+            <td style="width: 1831.23px;" >{{row.bomdescription}}</td>
+            <td style="width: 131px; text-align: center;"></td>
+            <td style="width: 104px; text-align: center;">{{row.bomunit}}</td>
+            <td style="width: 81px; text-align: center;"></td>
+        </tr>
+        {% set count.value = count.value + 1 %}
+
+    {% endfor%}
+
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;" >&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 33px;">&nbsp;</td>
+        <td style="width: 104px;">&nbsp;</td>
+        <td style="width: 1831.23px;">&nbsp;</td>
+        <td style="width: 100px;">&nbsp;</td>
+        <td style="width: 131px;">&nbsp;</td>
+        <td style="width: 81px;">&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 137px; text-align: center;" colspan="2" bgcolor="lightgray"><strong>Tax Rate</strong></td>
+        <td style="width: 2050.23px;" colspan="5">&nbsp;</td>
+        <td style="width: 212px;" colspan="2" bgcolor="lightgray"><strong>Subtotal</strong></td>
+        <td style="width: 254px;" colspan="2"><strong>&nbsp;$ {{subtotal}} &nbsp;&nbsp;</strong></td>
+    </tr>
+    <tr>
+        <td style="width: 137px; text-align: center;" colspan="2"><strong></strong></td>
+        <td style="width: 2050.23px;" colspan="5">&nbsp;</td>
+        <td style="width: 212px;" colspan="2" bgcolor="lightgray"><strong>Tax</strong></td>
+        <td style="width: 254px;" colspan="2"><strong>&nbsp;$ {{taxed}}</strong></td>
+    </tr>
+    <tr>
+        <td style="width: 396.6px; text-align: center;" colspan="3" bgcolor="lightgray"><strong>ISTI Contact</strong></td>
+        <td style="width: 622.4px; text-align: center;" bgcolor="lightgray"><strong>Phone #&nbsp;</strong></td>
+        <td style="width: 169px; text-align: center;" bgcolor="lightgray"><strong>Fax #</strong></td>
+        <td style="width: 999.225px; text-align: center;" colspan="2" bgcolor="lightgray"><strong>E-Mail Address</strong></td>
+        <td style="width: 212px;" colspan="2" bgcolor="lightgray"><strong>Shipping &amp; Handling</strong></td>
+        <td style="width: 254px;" colspan="2"><strong>&nbsp;$&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -&nbsp;&nbsp;</strong></td>
+    </tr>
+    <tr>
+        <td style="width: 396.6px; text-align: center;" colspan="3">&nbsp;{{buyer.name}}</td>
+        <td style="width: 622.4px; text-align: center;">{{buyer.phone}}&nbsp;</td>
+        <td style="width: 169px;">&nbsp;</td>
+        <td style="width: 999.225px; text-align: center;" colspan="2">&nbsp;{{buyer.email}}</td>
+        <td style="width: 212px;" colspan="2" bgcolor="lightgray"><strong>Total (USD)</strong></td>
+        <td style="width: 254px;" colspan="2"><strong>&nbsp;$ {{total}}&nbsp;&nbsp;</strong></td>
+    </tr>
+    <tr>
+        <td style="width: 2653.23px;"  bgcolor="lightgray"><strong>Instructions and Conditions:</strong></td>
+    </tr>
+    <tr>
+        <td style="width: 2653.23px;" >.</td>
+    </tr>
+    <tr>
+        <td style="width: 2653.23px;" >.</td>
+    </tr>
+    <tr>
+        <td style="width: 2653.23px;" >.</td>
+    </tr>
+    <tr>
+        <td style="width: 2653.23px;" >&nbsp;</td>
+    </tr>
+    <tr>
+        <td style="width: 2653.23px;" >&nbsp;</td>
+    </tr>
+    </tbody>
+    </table>
+
+</body>
+</html>

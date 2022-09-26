@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+{% block title %}PO SYSTEM{% endblock %}
+
+{% block content %}
+
+   <div class="row">
+      <div class="col-md-auto">
+         <h2 id="top">PO # {{po.ponumber}}</h2>
+      </div>
+
+      <div class="col">
+         <div class="row" style="float:right;">
+
+            <div class="col col-md">
+               <form action="{{url_for('importpoitemscpp')}}" method="POST" enctype="multipart/form-data"> 
+                  <div class="form-group" style="float:right;">
+                  <input type="hidden"  name="ponumber" value="{{po.ponumber}}">
+                  <input type="hidden" name="povendor" value="{{po.povendor}}">
+                  <input type="hidden" name="pocreated" value="{{po.pocreated}}">
+                  <input type="hidden" name="pojobtype" value="{{po.pojobtype}}">
+                  <input type="hidden" name="pojobtypenum" value="{{po.pojobtypenum}}">
+                  {{formexcel.hidden_tag()}}
+                  {{formexcel.csrf_token}}
+                  {{formexcel.itemfile}}
+                  <button class="btn btn-warning" type="submit">IMPORT EXCEL FILE</button>
+                  </div>
+               </form>
+            </div>
+            <div class="col col-md-auto">
+               <td><a href="/deletepo/{{po.id}}" class="btn btn-danger" onclick="return confirm('Are You Sure To Delete ?')">Discard PO</a></td>
+            </div>
+
+         <!--
+            <div class="col col-md">
+               <form action="mailto:email@example.com?subject=PO#{{po.ponumber}}%20{{po.povendor}}&attachment=c:\test\test.txt" method="POST"> 
+                  <div class="form-group">
+                  <input type="hidden"  name="id" value="{{po.id}}">
+                  <input type="hidden"  name="sendto" value="vendor">
+                  <button class="btn btn-primary" type="submit">Send PO Email</button>
+                  </div>
+               </form>
+            </div>
+         -->
+
+            <div class="col col-md-auto">
+                  <form action="{{url_for('podownload')}}" method="POST"> 
+                     <div class="form-group">
+                     <input type="hidden"  name="id" value="{{po.id}}">
+                     <input type="hidden"  name="sendto" value="receiving">
+                     <button class="btn btn-primary" type="submit">View PO</button>
+                     </div>
+                  </form>
+            </div>
+         
+            <div class="col col-md-auto">
+               <form action="{{url_for('flatfilepoexport')}}" method="POST"> 
+                  <div class="form-group">
+                     <input type="hidden" value="{{po.ponumber}}"  name="flatfileponumber" id="flatfileponumber">
+                     <input type="hidden" value="{{po.potaxrate}}"  name="potaxrate" id="potaxrate">
+                     <button class= "btn btn-success" type="submit">Generate FlatFile</button>
+                  </div>
+               </form>
+               <form action="{{url_for('poreceiving')}}" method="POST"> 
+                  <div class="form-group">
+                  <input type="hidden"  name="id" value="{{po.id}}">
+                  <input type="hidden"  name="sendto" value="receiving">
+                  <button class="btn btn-success" type="submit">Receiving Copy</button> 
+                  </div>
+               </form>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <div class="row">
+      <div class="col">
+         <b>Vendor: </b> {{po.povendor}}<br>        
+         {{vendor.vendoraddress1}}<br>
+         {{vendor.vendorcity}},{{vendor.vendorstate}}&nbsp;{{vendor.vendorzipcode}}<br>
+         <b>Contact:</b> {{vendor.vendorcontact}}<br>
+         {{vendor.vendorphone}} <br>
+         {{vendor.vendormemail}} <br>
+      </div>
+      <!--CHANGE PURCHASER AFTER CREATING PURCHASER TABLE-->
+      <div class="col">
+         <b>Purchaser </b> {{po.pocreatedby}}<br>
+         Phone: (###) ###-#### <br>
+         Email: email@email.com 
+      </div>
+
+      <div class="col">
+         <b>Bill to: {{buyer.company}}</b><br>
+         {%if buyer.company == "PREMIER PLANT SERVICES"%}
+            2429 Industrial <br>
+            Sapulpa, OK 74066-8335<br>
+         {%else%}
+            7050 S Yale Ave <br>
+            Tulsa, OK 74136 <br>
+         {%endif%}
+         <b>Ship to: {{po.poshipto}}</b><br>
+         {{shipto.locationaddress}}<br>
+         {{shipto.locationcity}},{{shipto.locationstate}}&nbsp;{{shipto.locationzipcode}}
+      </div>
+
+      <div class="col">
+         <b>On Site Contact(s):</b>
+      </div>
+   </div>
+
+      <div id="thetotals" style="float:right;">
+         <span id="taxrate"><b>Tax Rate: {{po.potaxrate}} %</b></span><br>
+            <b>Subtotal: $</b> {{subtotal}}
+         <br><br>
+      </div>
+
+      <div class="form-group">
+         <b>Creation Date:</b> {{po.pocreated}}
+      </div>
+
+      <div class="form-group">
+         <b>Job Type:</b> {{po.pojobtype}}          
+      </div>       
+
+
+
+                 
+   <!-- Tabbed Input Items Manual -->
+   <div class="row">
+
+      <form action="{{url_for('insertpoitemsmanual')}}" id="manual" method="POST" autocomplete="off">
+         <table id="vendoritems" class="table table-hover table-dark mb-0 table-sm" cellspacing="0" cellpadding="0" width="100%" >
+            <colgroup>
+               <col span="1" style="width: 7%;">
+               <col span="1" style="width: 79%;">
+               <col span="1" style="width: 7%;">
+               <col span="1" style="width: 7%;">
+            </colgroup>
+            <thead>
+               <tr>
+                  <th>QTY</th>
+                  <th>Item Description</th>
+                  <th>Item Cost</th>
+                  <th>UOM</th>
+               </tr>
+            </thead>
+            <tbody>
+               <tr>
+                  <td><input type="number" class="form-control" id="poitemquantity" name="poitemquantity" form="manual" autofocus></td>
+                  <td><input type="text" class="form-control" name="poitemdescription" form="manual" placeholder="Item Description"></td>
+                  <td><input type="number" class="form-control" name="itemprice" form="manual"></td>
+                  <td><input type="text" class="form-control" name="itemunit" form="manual" placeholder="lb. case ft." onchange="this.form.submit()" autocomplete="off"></td>
+                  
+                  <input type="hidden" class="form-control" name="itempart" form="manual" placeholder="Part Number" value="###">
+                  <input type="hidden" class="form-control" name="itemcostcode" form="manual" placeholder="###" value="###">
+                  <input type="hidden"  name="ponumber" value="{{po.ponumber}}" form="manual">
+                  <input type="hidden"  name="poitemskid" value="{{po.poskid}}" form="manual">
+                  <input type="hidden"  name="pocreated" value="{{po.pocreated}}" form="manual">
+                  <input type="hidden"  name="pojobtype" value="{{po.pojobtype}}" form="manual">
+                  <input type="hidden"  name="pojobtypenum" value="{{po.pojobtypenum}}" form="manual">
+                  <input type="hidden"  name="itemvendor" value="{{po.povendor}}" form="manual">
+
+            </tr>
+            </tbody> 
+         </table>
+      </form>
+   </div>
+
+   <div class="row">
+      <table class="table table-bordered table-striped table-sm" id="addeditems" style="width:100%">
+
+         <thead>
+            <tr>
+               <th><a href="#top">↑</a></th>
+               <th>QTY</th>
+               <th>ITEM DESCRIPTION</th>
+               <th>PART No./Tag No.</th>
+               <th>COST CODE</th>
+               <th>ITEM COST</th>
+               <th>UOM</th>
+               <th>TOTAL</th>
+               <th></th>
+            </tr>
+         </thead>
+         
+                  
+         {% set count = namespace(value=1) %}
+         {% for row in poitems %}
+            <!--ONLY SHOW ITEMS THAT MATCH WITH THE CURRENT PO-->
+                  
+               <tr>
+                  <td style="text-align:center;">{{ count.value }}</td>
+                  <td><form action="{{url_for('poitemeditcell')}}" method="POST" enctype="multipart/form-data">
+                     <input type="text" class="form-control" name="poitemquantity" value="{{row.poitemquantity}}" onchange="this.form.submit()" autocomplete="off" size="3">
+                     <input type="hidden" name="id" value="{{row.id}}">
+                     <input type="hidden" name="poitemdescription" value="{{row.poitemdescription}}">
+                     <input type="hidden" name="poitemprice" value="{{row.poitemprice}}">
+                     <input type="hidden" name="poitemunit" value="{{row.poitemunit}}">
+                     <input type="hidden" name="poitemtotalprice" value="{{row.poitemtotalprice}}">
+                     <input type="hidden" name="poitemcostcode" value="{{row.poitemcostcode}}">
+                     <input type="hidden" name="poitemtag" value="{{row.poitemtag}}">
+                  </form></td>
+                  <td><form action="{{url_for('poitemeditcell')}}" method="POST" enctype="multipart/form-data">
+                     <input type="text" class="form-control" name="poitemdescription" value="{{row.poitemdescription}}" onchange="this.form.submit()" autocomplete="off" size="115">
+                     <input type="hidden" name="id" value="{{row.id}}">
+                     <input type="hidden" name="poitemquantity" value="{{row.poitemquantity}}">
+                     <input type="hidden" name="poitemprice" value="{{row.poitemprice}}">
+                     <input type="hidden" name="poitemunit" value="{{row.poitemunit}}">
+                     <input type="hidden" name="poitemtotalprice" value="{{row.poitemtotalprice}}">
+                     <input type="hidden" name="poitemcostcode" value="{{row.poitemcostcode}}">
+                     <input type="hidden" name="poitemtag" value="{{row.poitemtag}}">
+                  </form></td>
+                  <td><form action="{{url_for('poitemeditcell')}}" method="POST" enctype="multipart/form-data">
+                     {%if row.poitemtag == None %}
+                        <input type="text" class="form-control" name="poitemtag" value="" onchange="this.form.submit()" autocomplete="off" size="19">
+                     {%else%}
+                        <input type="text" class="form-control" name="poitemtag" value="{{row.poitemtag}}" onchange="this.form.submit()" autocomplete="off" size="19">
+                     {%endif%}
+                     <input type="hidden" name="id" value="{{row.id}}">
+                     <input type="hidden" name="poitemquantity" value="{{row.poitemquantity}}">
+                     <input type="hidden" name="poitemprice" value="{{row.poitemprice}}">
+                     <input type="hidden" name="poitemunit" value="{{row.poitemunit}}">
+                     <input type="hidden" name="poitemtotalprice" value="{{row.poitemtotalprice}}">
+                     <input type="hidden" name="poitemcostcode" value="{{row.poitemcostcode}}">
+                     <input type="hidden" name="poitemdescription" value="{{row.poitemdescription}}">
+                  </form></td>
+                  <td><form action="{{url_for('poitemeditcell')}}" method="POST" enctype="multipart/form-data">
+                     <input type="text" class="form-control" name="poitemcostcode" value="{{row.poitemcostcode}}" onchange="this.form.submit()" autocomplete="off" size="3">
+                     <input type="hidden" name="id" value="{{row.id}}">
+                     <input type="hidden" name="poitemdescription" value="{{row.poitemdescription}}">
+                     <input type="hidden" name="poitemquantity" value="{{row.poitemquantity}}">
+                     <input type="hidden" name="poitemunit" value="{{row.poitemunit}}">
+                     <input type="hidden" name="poitemtotalprice" value="{{row.poitemtotalprice}}">
+                     <input type="hidden" name="poitemprice" value="{{row.poitemprice}}">
+                     <input type="hidden" name="poitemtag" value="{{row.poitemtag}}">
+                  </form></td>
+                  <td><form action="{{url_for('poitemeditcell')}}" method="POST" enctype="multipart/form-data">
+                     <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text" id="basic-addon1">$</span>
+                        </div>
+                        <input type="text" class="form-control" name="poitemprice" value="{{row.poitemprice}}" onchange="this.form.submit()" aria-describedby="basic-addon1" autocomplete="off" size="4">
+                     </div>
+                     <input type="hidden" name="id" value="{{row.id}}">
+                     <input type="hidden" name="poitemdescription" value="{{row.poitemdescription}}">
+                     <input type="hidden" name="poitemquantity" value="{{row.poitemquantity}}">
+                     <input type="hidden" name="poitemunit" value="{{row.poitemunit}}">
+                     <input type="hidden" name="poitemtotalprice" value="{{row.poitemtotalprice}}">
+                     <input type="hidden" name="poitemcostcode" value="{{row.poitemcostcode}}">
+                     <input type="hidden" name="poitemtag" value="{{row.poitemtag}}">
+                  </form></td>
+                  <td><form action="{{url_for('poitemeditcell')}}" method="POST" enctype="multipart/form-data">
+                     <input type="text" class="form-control" name="poitemunit" value="{{row.poitemunit}}" onchange="this.form.submit()" autocomplete="off" size="3">
+                     <input type="hidden" name="id" value="{{row.id}}">
+                     <input type="hidden" name="poitemdescription" value="{{row.poitemdescription}}">
+                     <input type="hidden" name="poitemprice" value="{{row.poitemprice}}">
+                     <input type="hidden" name="poitemquantity" value="{{row.poitemquantity}}">
+                     <input type="hidden" name="poitemtotalprice" value="{{row.poitemtotalprice}}">
+                     <input type="hidden" name="poitemcostcode" value="{{row.poitemcostcode}}">                     
+                     <input type="hidden" name="poitemtag" value="{{row.poitemtag}}">
+                  </form></td>
+                  <td><form action="{{url_for('poitemeditcell')}}" method="POST" enctype="multipart/form-data">
+                     <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                          <span class="input-group-text" id="basic-addon1">$</span>
+                        </div>
+                        <input type="text" class="form-control" name="poitemtotalprice" value="{{row.poitemtotalprice}}" onchange="this.form.submit()" aria-describedby="basic-addon1" autocomplete="off" size="4">
+                     </div>
+                     <input type="hidden" name="id" value="{{row.id}}">
+                     <input type="hidden" name="poitemdescription" value="{{row.poitemdescription}}">
+                     <input type="hidden" name="poitemprice" value="{{row.poitemprice}}">
+                     <input type="hidden" name="poitemunit" value="{{row.poitemunit}}">
+                     <input type="hidden" name="poitemquantity" value="{{row.poitemquantity}}">
+                     <input type="hidden" name="poitemcostcode" value="{{row.poitemcostcode}}">
+                     <input type="hidden" name="poitemtag" value="{{row.poitemtag}}">
+                  </form></td>
+                  <td style="text-align:center;"><a href="/deletepoitemcpp/{{row.id}}" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Delete ?')">X</a></td>         
+               </tr>
+         {% set count.value = count.value + 1 %}
+            
+         {% endfor %}    
+
+         <tr>
+            <td style="text-align:center;">{{ count.value }}</td>   
+               <td><form action="{{url_for('poitemscpinsertcell')}}" method="POST" enctype="multipart/form-data">
+                  <input type="text" class="form-control" name="poitemquantity" onchange="this.form.submit()" autocomplete="off" size="3">
+                  <input type="hidden" name="vendor" value="{{vendor.vendorname}}">
+                  <input type="hidden" name="nextpo" value="{{po.ponumber}}">
+                  <input type="hidden" name="id" value="{{po.id}}">
+               </form></td>
+               <td><form action="{{url_for('poitemscpinsertcell')}}" method="POST" enctype="multipart/form-data">
+                  <input type="text" class="form-control" name="poitemdescription" onchange="this.form.submit()"  autocomplete="off" size="115">
+               </form></td> 
+               <td><form action="{{url_for('poitemscpinsertcell')}}" method="POST" enctype="multipart/form-data">
+                  <input type="text" class="form-control" name="poitemtag" onchange="this.form.submit()"  autocomplete="off" size="19">
+               </form></td> 
+               <td><form action="{{url_for('poitemscpinsertcell')}}" method="POST" enctype="multipart/form-data">
+                  <input type="text" class="form-control" name="poitemcostcode" onchange="this.form.submit()"  autocomplete="off" size="3">
+               </form></td>
+               <td><form action="{{url_for('poitemscpinsertcell')}}" method="POST" enctype="multipart/form-data">
+                  <div class="input-group mb-3">
+                     <div class="input-group-prepend">
+                       <span class="input-group-text" id="basic-addon1">$</span>
+                     </div>
+                     <input type="text" class="form-control" name="poitemprice" onchange="this.form.submit()" aria-describedby="basic-addon1" autocomplete="off" size="4">
+                  </div>
+               </form></td>
+               <td><form action="{{url_for('poitemscpinsertcell')}}" method="POST" enctype="multipart/form-data">
+                  <input type="text" class="form-control" name="poitemunit" onchange="this.form.submit()"  autocomplete="off" size="3">
+               </form></td>
+               <td><form action="{{url_for('poitemscpinsertcell')}}" method="POST" enctype="multipart/form-data">
+                  <div class="input-group mb-3">
+                     <div class="input-group-prepend">
+                       <span class="input-group-text" id="basic-addon1">$</span>
+                     </div>
+                     <input type="text" class="form-control" name="poitemtotalprice" onchange="this.form.submit()" aria-describedby="basic-addon1" autocomplete="off" size="4">
+                  </div>
+               </form></td>
+               <td></td>                               
+         </tr>   
+      </table>
+   </div>
+
+
+
+
+{% endblock %}
+
+
+<!--Script for Databases.js-->
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+      $('#addeditems').DataTable({
+         "deferRender": true,
+         "scroller": true,
+         "stateSave": true,
+         "scrollX": false,
+         "scrollY": 850,
+         "ScrollCollapse": true,
+         fixedHeader: true,
+         "paging": false,
+         "searching": false,
+         "ordering":false,
+         "info":false,
+          columns: [
+          {orderable: false, searchable: false},
+          {orderable: false, searchable: false},
+          {orderable: false, searchable: false},
+          {orderable: false, searchable: false},
+          {orderable: false, searchable: false},
+          {orderable: false, searchable: false},
+          {orderable: false, searchable: false},
+          {orderable: false, searchable: false},
+          {orderable: false, searchable: false}
+            ],
+      });
+    });
+  </script>
+
+   <!--script to lock scroll position-->
+   <script>   
+   document.addEventListener("DOMContentLoaded", function(event) { 
+         var scrollpos = localStorage.getItem('scrollpos');
+         if (scrollpos) window.scrollTo(0, scrollpos);
+   });
+
+   window.onbeforeunload = function(e) {
+         localStorage.setItem('scrollpos', window.scrollY);
+   };
+   </script>
+           
+{% endblock %}
+

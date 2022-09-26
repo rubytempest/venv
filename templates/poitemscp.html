@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% block title %}PO SYSTEM{% endblock %}
+
+{% block content %}
+
+<br>
+<div style="float:right">
+   <form class="form-group" action="{{url_for('poitemsredirect')}}" method="POST">
+      <b>Find PO:</b> <input type="text" name="poredirect">
+   </form>
+</div>
+
+   <div class="row" style="width:50% ;">
+
+      <div class="col-md-auto">
+         <form class="form-group" action="{{url_for('poitemscp')}}" method="POST">
+            <div class="form-group">
+            <!--SUBMIT ON WTFORM SELECT CHANGE-->
+            <b>JOB # </b>           
+            {{form.bomjobnumber(**{"onchange":"this.form.submit()"})}}
+            <input type="hidden" name="poshipto" value="-">
+            <input type="hidden" name="povendor" value="Airgas USA LLC">
+            <input type="hidden" name="ponumber" value="000">
+
+            </div>
+         </form>
+      </div>
+      <div class="col-md-auto">
+         <form action="{{url_for('poitemscp')}}" method="POST" class="form-inline">   
+            <b>PO # </b><input type="text" name="ponumber" value={{nextpo}} onchange="this.form.submit()" autocomplete="off"> 
+      </div>
+      <div class="col-md-auto">
+            <b>Creation Date: </b><input type="date" name="pocreated" value="{{today}}">
+      </div>
+      
+   </div>
+
+   <div class="row" style="width:50%">
+      <div class="col-md-auto">
+         <b>Vendor: </b>
+         {{formpo.povendor(size=1,**{"onchange":"this.form.submit()"})}}
+         {% for error in formpo.povendor.errors %}
+         <span style="color:red;">
+           {{error}}
+         </span>
+           {% endfor %}
+      </div>
+      <div class="col-md-auto"></div>
+      <div class="col-md-auto">
+         <b>Required Date:</b>
+         <input type="date" value="{{required}}" >
+      </div>
+   </div>
+
+   <div class="row" style="width:50%">
+      <div class="col-md-auto">
+         <b>Purchaser:</b>
+      </div>
+      <div class="col-md-auto"></div>
+      <div class="col-md-auto">
+         <b>E-mail:</b>
+      </div>
+   </div>
+
+   <div class="row" style="width:50%">
+      <div class="col-md-auto">
+         <b>Acct. Code:</b>
+      </div>
+      <div class="col-md-auto"></div>
+      <div class="col-md-auto">
+         <b>Standard Notes:</b>
+      </div>
+   </div>
+
+   <div class="row" style="width:42%">
+      <div class="col">
+         <b>Special Notes:</b><br>
+            <textarea style="width: 100%; max-width: 100%;"></textarea>
+      </div>
+   </div>
+
+   <div class="row" style="width:65%">
+      <div class="col">
+         <div class="form-group">
+         <b>Ship to:</b> 
+         {%if hide != 1%}
+            {{formpo.poshipto(**{"onchange":"this.form.submit()"})}}
+         {%endif%}
+         </div>
+         <input type="hidden" name="bomjobnumber" value={{pojob}}>
+         <textarea id="location" name="location" rows="4" style="width: 100%; max-width: 100%;">{{shipto.locationname}}&#13;&#10;{{shipto.locationaddress}}&#13;&#10;{{shipto.locationcity}}, {{shipto.locationstate}} {{shipto.locationzipcode}}
+         </textarea>
+      </div>
+   </form>
+      <div class="col">
+         <div class="form-group">
+            <b>Shipping/Receiving Notes:</b>
+         </div>
+         <textarea rows="4" style="width: 100%; max-width: 100%;">
+         </textarea>
+
+         <div class="form-group">
+            <b>FOB</b>                 
+            <input type="text" name="fob" value=""> 
+         </div>   
+      </div>
+      <div class="col">
+         <div class="form-group">
+            <b>On-Site Contact(s):</b>
+         </div>
+   </div>
+
+
+                        <div class="form-group">
+                           <b>{{formpo.pojobtype.label}}</b>
+                           {{formpo.pojobtype(size=1)}}
+                        </div>	
+
+                        <div class="form-group">
+                           <button class="btn btn-danger" type="submit">Reserve PO No.</button>
+                         </div>    
+
+                  <form action="{{url_for('poitemscpposave')}}" method="POST" enctype="multipart/form-data">
+                     
+                     <input type="hidden" name="pocreated" value="{{pocreated}}">
+                     <input type="hidden" name="ponumber" value={{nextpo}}>
+                     <input type="hidden" name="poshipto" value="{{shipto.locationname}}">
+                     <input type="hidden" name="pojob" value="{{pojob}}">
+                     <input type="hidden" name="povendor" value="{{vendor}}">
+                     <input type="hidden" name="pojobtype" value="{{pojobtype}}">
+                  
+                     <div class="form-group">
+                        <button class="btn btn-primary" type="submit">Add Items to PO</button>
+                      </div>    
+                  </form>
+            </div>
+
+
+
+            <div class="row">
+               <table class="table table-bordered table-striped table-hover table-sm" id="reloaded">
+                  <tr>
+                     <th></th>
+                     <th>QTY</th>
+                     <th>ITEM DESCRIPTION</th>
+                     <th>ITEM COST</th>
+                     <th>UOM</th>
+                     <th>TOTAL</th>
+                     <th></th>
+                  </tr>
+         
+                  
+                  {% set count = namespace(value=1) %}
+                  {% for row in poitems %}
+                     <!--ONLY SHOW ITEMS THAT MATCH WITH THE CURRENT PO-->
+                     {% if row.poitempo == "0874875203984" %}     
+                        <tr>
+                           <td style="text-align:center;">{{ count.value }}</td>
+                           <td style="text-align:center;" contenteditable="true">{{row.poitemquantity}}</td>
+                           <td contenteditable="true">{{row.poitemdescription}}</td>
+                           <td style="text-align:center;" contenteditable="true">$ {{row.poitemprice}}</td>
+                           <td style="text-align:center;" contenteditable="true">{{row.poitemunit}}</td>
+                           <td>$ {{row.poitemtotalprice}}</td>
+                           <td style="text-align:center;"><a href="/deletepoitemv2/{{row.id}}" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Delete ?')">X</a></td>         
+                        </tr>
+                  {% set count.value = count.value + 1 %}
+                     {% endif %}
+                  {% endfor %}    
+
+
+                     {% for x in range(451-count.value) %}
+                     <tr>
+                        <td style="text-align:center;">{{ count.value }}</td>
+                        <td colspan="6">               
+                           <form action="{{url_for('poitemscpinsert')}}" method="POST" enctype="multipart/form-data">
+                              <input type="text" name="excelpaste" style="width:90%;" onchange="this.form.submit()" disabled="true">
+                              <input type="hidden" name="nextpo" value="{{nextpo}}">
+                           </form>  
+                        </td>          
+                     </tr>
+                     {% set count.value = count.value + 1 %}
+                     {% endfor %}                          
+               </table>
+            </div>
+
+
+
+
+   {% endblock %}
+
+   <!--Script for Databases.js-->
+   {% block scripts %}
+   <script>
+      $(document).ready(function () {
+         $('#vendoritems').DataTable({
+            "order": [],
+            "scrollX": false,
+            "paging": false,
+            columns: [
+            {orderable: false},
+            {orderable: false},
+            {orderable: false, searchable: false},
+            {orderable: false, searchable: false},
+            {orderable: false, searchable: false},
+               ],
+         });
+      });
+   </script>
+
+   <script type="text/javascript">
+      {
+         $('#refresh-section').load(location.href + " #refresh-section");
+      }
+   </script>
+
+   {% endblock %}
+

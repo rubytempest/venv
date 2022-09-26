@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% block title %}Items Page{% endblock %}
+
+{% block content %}
+
+<div class="row">
+	<div class="col md-10">
+		<div>
+			<h2>Manage Items</h2> 
+
+				<button type="button"  class="btn btn-success float-left" data-toggle="modal" data-target="#mymodal">Add New Item</button>
+				<button type="button"  class="btn btn-success float-right" data-toggle="modal" data-target="#excelupload">Import .xlsx File</button>
+
+			<br>
+			<br>
+			<table id="data" class="table table-striped display no-wrap table-hover table-sm">
+			<thead>
+				<tr>
+					<th>Vendor</th>
+					<th>Part #</th>
+					<th>Product Description</th>
+					<th>Unit</th>
+					<th>Min. OQ</th>
+					<th>Cost</th>
+					<th>Action</th>
+					<th>Delete</th>
+				</tr>
+			</thead>
+			{% for row in items %}
+				<tr>
+					<td>{{row.itemvendor}}</td>
+					<td>{{row.itempart}}</td>
+						{% if row.itemdatasheet%}
+					<td><a href={{row.itemdatasheet}} target="_blank">{{row.itemdescription}}</a></td>
+						{% else %}
+					<td>{{row.itemdescription}}</td>
+						{% endif %}
+					<td>{{row.itemunit}}</td>
+					<td>{{row.itemminoqt}}</td>
+					<td>$ {{row.itemprice}}</td>
+
+					<td><a href="/updateitem/{{row.id}}" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#modaledit{{row.id}}">Edit</a></td>
+					<td><a href="/deleteitem/{{row.id}}" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Delete ?')">X</a></td>               
+				</tr>
+
+   
+                <!-- Modal Edit Items-->
+                <div id="modaledit{{row.id}}" class="modal fade" role="dialog">
+					<div class="modal-dialog">  
+					   	<div class="modal-content">		
+						  	<div class="modal-header">
+								<h4 class="modal-title">Update Information</h4> 
+						  	</div>			  
+				  
+						  	<div class="modal-body">                  
+							 	<form action="{{url_for('updateitem')}}" method="POST" autocomplete="off">                  
+									<div class="form-group">
+										<input type="hidden"  name="id" value="{{row.id}}">       
+									</div>                                             
+									<div class="form-group">                  
+										<label>Part #</label>
+										<input type="text" class="form-control" name="itempart" value="{{row.itempart}}" >
+									</div>                
+									<div class="form-group">                  
+										<label>Description</label>
+										<input type="text" class="form-control" name="itemdescription" value="{{row.itemdescription}}" >
+									</div>                
+									<div class="form-group">                  
+										<label>Unit</label>
+										<input type="text" class="form-control" name="itemunit" value="{{row.itemunit}}" >
+									</div>                  
+									<div class="form-group">                  
+										<label>Min. OQT</label>
+										<input type="text" class="form-control" name="itemminoqt" value="{{row.itemminoqt}}" >
+									</div>                
+									<div class="form-group">                  
+										<label>Cost Code</label>
+										<input type="text" class="form-control" name="itemcostcode" value="{{row.itemcostcode}}" >
+									</div>               
+									<div class="form-group">                  
+										<label>Price</label>
+										<input type="text" class="form-control" name="itemprice" value="{{row.itemprice}}" >
+									</div>  
+									<div class="form-group">                  
+										<label>Add Item Datasheet URL</label>
+										<input type="text" class="form-control" name="itemdatasheet" value="{{row.itemdatasheet}}" >
+									</div>  			  
+									<div class="form-group">
+									<button class="btn btn-primary" type="submit">Update</button>
+									</div>               
+							 	</form>
+						  	</div>                
+				  
+						  	<div class="modal-footer">
+							 	<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>                              
+						  	</div> 
+							                                   
+					   	</div>                                     
+					</div>                 
+				</div>
+				  
+				  
+									 {% endfor %}
+							                       
+								 </table>               
+		</div>
+
+				<!-- Modal To Add New Item -->
+				<div id="mymodal" class="modal fade" role="dialog">
+					<div class="modal-dialog">
+					   	<div class="modal-content">
+						  	<div class="modal-header">
+								<h4 class="modal-title">Add New Item</h4>
+						  	</div>
+						<div class="modal-body">                  
+						   <form action="{{url_for('insertitem')}}" method="POST" autocomplete="off">                  
+							  <div class="form-group">
+								 <input type="hidden"  name="id" value="{{id}}">
+									{{form.itemvendor.label}}
+									{{form.itemvendor(class_="form-control",size=1)}}           
+							  </div>
+							  	<div class="form-group">                          
+									{{form.itempart.label}}
+									{{form.itempart(class_="form-control", size=32)}}
+								</div>
+								<div class="form-group">
+									{{form.itemdescription.label}}
+									{{form.itemdescription(class_="form-control",size=32)}}
+								</div>
+								<div class="form-group">
+									{{form.itemunit.label}}
+									{{form.itemunit(class_="form-control",size=10)}}
+								</div>
+								<div class="form-group">
+									{{form.itemminoqt.label}}
+									{{form.itemminoqt(class_="form-control",size=1)}}
+								</div>
+								<div class="form-group">
+									{{form.itemcostcode.label}}
+									{{form.itemcostcode(class_="form-control",size=1)}}
+								</div>
+								<div class="form-group">
+									{{form.itemprice.label}}
+									{{form.itemprice(class_="form-control",size=1)}}
+								</div>
+							  	<div class="form-group">
+								 	<button class="btn btn-primary" type="submit">Add Item</button>
+							 	 </div>          
+							</form>                             
+						</div>
+				  
+				  
+								<div class="modal-footer">            
+									<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>                             
+								</div>               
+					   	</div>                                   
+					</div>			  
+				</div>  
+				<!--End of Add Item Modal-->
+				 
+
+				<!-- Modal To Upload Excel File -->
+				<div id="excelupload" class="modal fade" role="dialog">
+					<div class="modal-dialog">
+					    <div class="modal-content">
+						  	<div class="modal-header">
+								<h4 class="modal-title">Upload .xlsx Item List</h4>
+						  	</div>
+						<div class="modal-body">                  
+						    <form action="{{url_for('listupload')}}" method="POST" enctype="multipart/form-data">                  
+							  	<div class="form-group">
+								 	{{form.itemvendor.label}}
+								 	{{form.itemvendor(size=1)}}           
+							  	</div>	
+									{{form.hidden_tag()}}
+									{{form.csrf_token}}
+									{{form.itemfile.label}}
+									{{form.itemfile}}
+								<div class="form-group">
+								 	<button class="btn btn-primary" type="submit">Submit Item List</button>
+								</div>          
+							</form>                             
+						</div>
+						<div class="modal-footer">            
+							<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>                             
+						</div>    
+
+					    </div>                                   
+					</div>			  
+				 </div>  
+				<!--End of Upload Excel File Modal-->
+
+
+	</div>                   
+</div>            
+{% endblock %}
+
+
+<!--Script for Databases.js-->
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+      $('#data').DataTable({
+		"order": [],
+        columns: [
+          null,
+          {orderable: false},
+          null,
+          {orderable: false, searchable: false},
+          {orderable: false, searchable: false},
+		  {orderable: false, searchable: false},
+		  {orderable: false, searchable: false},
+		  {orderable: false, searchable: false}],
+      });
+    });
+  </script>
+{% endblock %}
