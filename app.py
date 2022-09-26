@@ -17,6 +17,7 @@ import csv                                                                      
 import os                                                                       #import required to save files into server
 from fractions import Fraction
 import datetime 
+						  
 from PyPDF2 import PdfMerger
 
 
@@ -81,8 +82,12 @@ class VendorsInfo(db.Model):                            #VENDORS MODELS
     vendorphone = db.Column(db.String(100))
     vendormemail = db.Column(db.String(100))
     vendortaxrate = db.Column(db.Float)
+    vendorpaymentterm = db.Column(db.String(100))
+    vendorcostcode = db.Column(db.String(10))
+    vendoroknexus = db.Column(db.Boolean, default = False)
+    vendortxnexus = db.Column(db.Boolean, default = False)
  
-    def __init__(self, vendorname, vendornumber, vendoraddress1, vendoraddress2, vendorcity, vendorsate, vendorzipcode, vendorcontact, vendorphone, vendormemail, vendortaxrate):
+    def __init__(self, vendorname, vendornumber, vendoraddress1, vendoraddress2, vendorcity, vendorsate, vendorzipcode, vendorcontact, vendorphone, vendormemail, vendortaxrate, vendorpaymentterm, vendorcostcode, vendoroknexus, vendortxnexus):
         self.vendorname = vendorname
         self.vendornumber = vendornumber
         self.vendoraddress1 = vendoraddress1
@@ -94,6 +99,11 @@ class VendorsInfo(db.Model):                            #VENDORS MODELS
         self.vendorphone = vendorphone
         self.vendormemail = vendormemail
         self.vendortaxrate = vendortaxrate
+        self.vendorpaymentterm = vendorpaymentterm
+        self.vendorcostcode = vendorcostcode
+        self.vendoroknexus = vendoroknexus
+        self.vendortxnexus = vendortxnexus
+
 
 class LocationInfo(db.Model):           #LOCATION MODEL
     id = db.Column(db.Integer, primary_key = True)
@@ -332,6 +342,25 @@ class SecondaryLocationInfo(db.Model):           #LOCATION MODEL
         self.secondlocationjobnumber = secondlocationjobnumber
         self.secondlocationbelongs = secondlocationbelongs
 
+							   
+												  
+															
+										   
+												
+											 
+											  
+											   
+												 
+
+																																		  
+										  
+										
+												
+											
+											
+											  
+												  
+
 ### LOGIN MANAGEMENT CODE ###
 @login_manager.user_loader
 def load_user(user_id):
@@ -340,6 +369,7 @@ def load_user(user_id):
 #___START ROUTING INSIDE APP___#
 
 ### ROUTES FOR LOGIN USERS ###
+
 @app.route('/', methods=["POST", "GET"])
 @login_required                                                 #request user for login to access this route
 def index():
@@ -351,15 +381,24 @@ def index():
 @app.route("/receiving", methods=["POST", "GET"])
 @login_required
 def receiving():
+					  
+															
+											
+							
+						
+										  
 
     all_data = POInfo.query.order_by(POInfo.id.desc()).all()                        #List of PO retrieved and organize = newest first
+						
 
     return render_template("receiving.html", pos = all_data)
+
 
 #VIEW RECITEMSV2.HTML
 @app.route("/recitemsv2/<ponumber>", methods=["POST", "GET"])
 @login_required
 def recitemsv2(ponumber):
+
     form = ReceivingForm()
     ponumber = ponumber                                       
     descending = POInfo.query.filter(POInfo.ponumber == ponumber)
@@ -375,9 +414,11 @@ def recitemsv2(ponumber):
     return render_template("recitemsv2.html", items = all_data, poitems=poitems, po=po, vendor=vendor, shipto=shipto, buyer=buyer, form=form)
 
 #UPDATE ALL RECITEMSV2
+
 @app.route("/insertallrecitemsv2", methods=["POST", "GET"])
 def insertallrecitemsv2():
     if request.method == 'POST':
+
 
         ponumber=request.form['ponumber']
         print(ponumber)
@@ -548,6 +589,7 @@ def insertpo():
         #TAX RATE CALCULATION ROUTINE
         vendor = VendorsInfo.query.filter_by(vendorname=povendor).first()
         receiving = LocationInfo.query.filter_by(locationname=poshipto).first()
+
         if vendor.vendorstate == 'OK' and receiving.locationstate == 'TX':
             potaxrate = vendor.vendortaxrate
         elif vendor.vendorstate != 'OK' and receiving.locationstate == 'OK':
@@ -561,6 +603,7 @@ def insertpo():
         db.session.add(my_data)
         db.session.commit()
          
+
         inputtype = request.form['inputtype']
         if inputtype == "manual":
             return redirect(url_for('poitemsmanual', ponumber=ponumber))
@@ -612,7 +655,7 @@ def updatepostatus():
 @login_required
 def locations():
     form= LocationsForm()                                                     #We declare here the form we'll use
-    all_data = LocationInfo.query.all()
+    all_data = LocationInfo.query.order_by(LocationInfo.locationjobnumber.asc()).all()
     states = [ 'AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DC', 'DE', 'FL', 'GA',
            'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME',
            'MI', 'MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM',
@@ -625,11 +668,24 @@ def locations():
 @app.route('/deletelocation/<id>/', methods = ['GET', 'POST'])
 def deletelocation(id):
     my_data = LocationInfo.query.get(id)
-    db.session.delete(my_data)
+    my_data.locationname = "INACTIVE"
     db.session.commit()
-    flash("Location Deleted Successfully")
+
+    flash("Job Marked as Inactive")
  
     return redirect(url_for('locations'))
+
+#COMPLETE LOCATION RECORD
+@app.route('/completelocation/<id>/', methods = ['GET', 'POST'])
+def completelocation(id):
+    my_data = LocationInfo.query.get(id)
+    my_data.locationname = "COMPLETE"
+    db.session.commit()
+
+    flash("Job Marked as COMPLETE")
+ 
+    return redirect(url_for('locations'))
+
 
 #CREATE NEW LOCATION RECORD
 @app.route('/insertlocation', methods = ['POST'])
@@ -840,6 +896,11 @@ def deletepoitemsmanual(id):
     return redirect(url_for('poitemsmanual', ponumber=my_data.poitempo))
 
 
+
+
+
+
+
 ########################################################################################
 ##############################POITEMSCP ROUTES##########################################
 ########################################################################################
@@ -851,7 +912,7 @@ def poitemscp():
     if request.method == 'GET':
         formpo = POForm()
         form=BomForm()
-        form.bomjobnumber.choices = ["----"]+[(bomjobnumber.locationjobnumber) for bomjobnumber in LocationInfo.query.all()]
+        form.bomjobnumber.choices = ["----"]+[(bomjobnumber.locationjobnumber) for bomjobnumber in LocationInfo.query.order_by(LocationInfo.locationjobnumber.asc()).all()]
         today = date.today()
         required=today + datetime.timedelta(days=7)
         hide = 1
@@ -980,6 +1041,7 @@ def poitemscpposave():
                 potaxrate = receiving.locationtaxrate
             else: 
                 potaxrate = receiving.locationtaxrate
+
             if receiving.locationtaxrate == 0:
                 potaxrate = 0
 
@@ -1028,7 +1090,7 @@ def poitemscpp(ponumber):
     form.bomjobnumber.choices = [(bomjobnumber.locationjobnumber) for bomjobnumber in LocationInfo.query.all()]
     today=date.today()
 
-    poitems = POItemsInfo.query.filter(POItemsInfo.poitempo == po.ponumber).all()
+    poitems = POItemsInfo.query.filter(POItemsInfo.poitempo == po.ponumber).order_by(POItemsInfo.id.asc()).all()
     
     subtotal = 0
     for each in poitems:
@@ -1088,6 +1150,19 @@ def poitemscpinsert():
 
     return redirect(url_for('poitemscpp', ponumber=poitempo))
 
+																										   
+																		  
+															   
+																																						 
+																															  
+
+																												  
+																		  
+															   
+																																									 
+																															  
+
+
 
 ###POITEMSCPINSERTCELL INITIALIZATION UPDATING QUANTITY FIELD
 @app.route("/poitemscpinsertcell", methods=["POST", "GET"])
@@ -1125,6 +1200,7 @@ def poitemscpinsertcell():
 
     return redirect(url_for('poitemscpp', ponumber=poitempo))
 
+
 #UPDATE POITEMEDITCELL
 @app.route('/poitemeditcell', methods = ['GET', 'POST'])
 def poitemeditcell():
@@ -1154,6 +1230,18 @@ def poitemeditcell():
  
     return redirect(url_for('poitemscpp', ponumber=poitempo))
 
+																										   
+																		  
+															   
+																																						 
+																															  
+
+																												  
+																		  
+															   
+																																									 
+																															  
+
 
 #### VIEW POITEMSV2 TABLE ####
 @app.route("/poitemsv2/<ponumber>", methods=["POST", "GET"])
@@ -1164,6 +1252,7 @@ def poitemsv2(ponumber):
     ponumber = ponumber                                       
     descending = POInfo.query.filter(POInfo.ponumber == ponumber)
     po = descending.first()
+
     vendor = VendorsInfo.query.filter_by(vendorname=po.povendor).first()
     shipto = LocationInfo.query.filter_by(locationname=po.poshipto).first()
     buyer = current_user
@@ -1174,6 +1263,7 @@ def poitemsv2(ponumber):
     formpo.povendor.choices = [(povendor.vendorname) for povendor in VendorsInfo.query.all()]  #query to populate vendors box
     formpo.pobillto.choices = [(pobillto.locationname) for pobillto in LocationInfo.query.all()]   #form.field.choices = [(field.infofromtable) for field in DatabaseTable.query.all()]
     formpo.poshipto.choices = [(poshipto.locationname) for poshipto in LocationInfo.query.all()] 
+
 
     form.poitemdescription.choices = [(poitemdescription.itemdescription) for poitemdescription in ItemsInfo.query.order_by(ItemsInfo.itemdescription.name).all()]
 
@@ -1268,6 +1358,9 @@ def insertvendor():
         db.session.add(my_data)
         db.session.commit()
  
+
+
+
  
         return redirect(url_for('vendors'))
 
@@ -1305,6 +1398,7 @@ def items(description=0):
     form= ItemsForm()                                                                               #We declare here the form we'll use
     all_data = ItemsInfo.query.order_by(ItemsInfo.id.desc()).all()                                  #Load database in reverse ID order (newest first)
     form.itemvendor.choices = [(itemvendor.vendorname) for itemvendor in VendorsInfo.query.order_by(VendorsInfo.vendorname.asc()).all()]   #Query to fill itemvendor combobox
+
 
     return render_template("items.html", items = all_data, form=form)
 
@@ -1367,6 +1461,7 @@ def listupload():
         form=ItemsForm()
 
         form.itemvendor.choices = [(itemvendor.vendorname) for itemvendor in VendorsInfo.query.all()]   #Query to fill itemvendor combobox
+
 
         filename=secure_filename(form.itemfile.data.filename)
         form.itemfile.data.save('temp/' + filename)
@@ -1438,6 +1533,7 @@ def bomread():
         data = pd.read_excel('temp/' + filename)      
         bom = data.to_dict()              
 
+
         index = 0
 
         for i in bom["Line Number"]:
@@ -1462,7 +1558,7 @@ def bomread():
                 bomtag = bom["Tag"][index]
 
             if math.isnan (bom["Uom"][index]):
-                bomunit = ""
+                bomunit = "ea."
             else:
                 bomunit = bom["Uom"][index]
 
@@ -1505,6 +1601,7 @@ def bomread():
             elif "PIPE" in bomdescription:
                 bomsearchterm = "FITTING"
                 bomcostcode = "630"
+                bomunit = "ft."			   
             else:
                 bomsearchterm = "STEEL"
             #MISSING OUTLETS CATEGORY
@@ -1515,6 +1612,7 @@ def bomread():
 
             db.session.add(my_data)
             db.session.commit()
+
 
         flash(str(index) + " BOM Material Added Successfully")
 
@@ -1591,9 +1689,23 @@ def bomrequest():
     db.session.add(my_podata)
     db.session.commit()
 
+																		  
+															   
+																																																			
+										   
 
+																					
+					
 
     return redirect(url_for('bom', pojob=bomjobnumber))
+  
+												 
+								
+	
+						 
+																					 
+
+																										   
 
 #### BOMITEMSV2.HTML  ####
 @app.route("/bomitemsv2/<ponumber>", methods=["POST", "GET"])
@@ -1652,6 +1764,7 @@ def initializebompo():
 
     if my_data.postatus == "REQUEST FOR QUOTE":
         lastpo = POInfo.query.filter(POInfo.pojob == my_data.pojob).order_by(POInfo.ponumber.desc()).first()
+						  
         format = lastpo.ponumber.replace("-","")
         nextpo = int(format) + 1
         nextpo = str(nextpo)
@@ -1770,6 +1883,7 @@ def bom_template(material,bomjobnumber):
     print(bomjobnumber)
     #Filter items in bom by requested query
     bom = BomInfo.query.filter(BomInfo.bomsearchterm.contains(material),BomInfo.bomjobnumber.like(bomjobnumber),BomInfo.bomstatus.like("RFQ")).order_by(BomInfo.bomdescription.desc())  #Filter if typed MAterial is in description    
+	
     #Group items with unique descriptions
     unique = bom.group_by(BomInfo.bomdescription, BomInfo.bomsize).all()
 
@@ -1806,6 +1920,7 @@ def bom_template(material,bomjobnumber):
         fraction = Fraction(0,1)
         counter=counter+1
         
+
     print(qtotals)
     buyer = current_user
 
@@ -1852,6 +1967,7 @@ def bom_excel(material,bomjobnumber):
     feet=0
     inch=0
     fraction = Fraction(0,1)
+						
 
     for i in unique:
         for full in bom:
@@ -1907,12 +2023,13 @@ def flatfile():
     poitems = POItemsInfo.query.order_by(POItemsInfo.id.desc()).all()
     return render_template("flatfile.html", poitems=poitems)   
 
+
 # FLATFILE GENERATION BY DATE
 @app.route('/flatfile/export', methods = ['GET', 'POST'])
 def flatfileexport():
 
     flatfiledate = request.form['flatfiledate']
-    poitems = POItemsInfo.query.filter_by(poitemdate = flatfiledate).all()
+    poitems = POItemsInfo.query.filter_by(poitemdate = flatfiledate).order_by(POItemsInfo.id.asc()).all()
 
     header =  ["Vendor","Job","Date","PO No.","Item","Description","Qty.","Rate","Unit","Amount","Tax","","","Job","","Item"]    
 
@@ -1934,7 +2051,7 @@ def flatfileexport():
 def flatfilepoexport():
 
     flatfileponumber = request.form['flatfileponumber']
-    poitems = POItemsInfo.query.filter_by(poitempo = flatfileponumber).all()
+    poitems = POItemsInfo.query.filter_by(poitempo = flatfileponumber).order_by(POItemsInfo.id.asc()).all()
     po = POInfo.query.filter_by(ponumber = flatfileponumber).first()
 
     header =  ["Vendor","Job","Date","PO No.","Item","Description","Qty.","Rate","Unit","Amount","Tax"]    
@@ -1951,7 +2068,7 @@ def flatfilepoexport():
             writer.writerow(data)
     
     #Code to convert csv file to xlsx
-    read_file = pd.read_csv (str(flatfileponumber) + " FF" + '.csv')
+    read_file = pd.read_csv(str(flatfileponumber) + " FF" + '.csv')
     read_file.to_excel (str(flatfileponumber) + " FF" + '.xlsx', index=None, header=True)
 
     flash("FlatFile for " + str(flatfileponumber) + " has been generated!")
@@ -2167,6 +2284,7 @@ def isti_po_format_priceless(ponumber):
     vendor = VendorsInfo.query.filter_by(vendorname=po.povendor).first()
     shipto = LocationInfo.query.filter_by(locationname=po.poshipto).first()
     buyer = current_user
+
 
     all_data = POItemsInfo.query.order_by(POItemsInfo.id.asc()).all()  #Change all to only those who belong to po number
 

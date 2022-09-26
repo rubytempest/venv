@@ -24,7 +24,7 @@
                <th>Email</th>
                <th>Tax Rate</th>
                <th></th>
-               <th></th>
+               <th>Mark Inactive</th>
             </tr>
          </thead>
 
@@ -42,7 +42,7 @@
                <td>{{row.vendormemail}}</td>
                <td>{{row.vendortaxrate}} %</td>
                <td><a href="/updatevendor/{{row.id}}" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#modaledit{{row.id}}">Edit</a></td>
-               <td><a href="/deletevendor/{{row.id}}" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Delete ?')">X</a></td>               
+               <td><a href="/deletevendor/{{row.id}}" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Mark As Inactive ?')">-</a></td>               
          </tr>
    
    

@@ -19,10 +19,13 @@
                <th>Zip Code</th>
                <th>Tax Rate</th>
                <th>Action</th>
-               <th>Delete</th>
+               <th>Mark Inactive</th>
+               <th>Mark Completed</th>
             </tr>
          </thead>
       {% for row in locations %}
+         {%if row.locationname != "INACTIVE" %}
+         {%if row.locationname != "COMPLETE" %}
                      <tr>
                            <td>{{row.locationjobnumber}}</td>
                            <td>{{row.locationname}}</td>
@@ -33,8 +36,9 @@
                            <td><b>{{row.locationtaxrate}} %</b></td>
 
                            <td><a href="/updatelocation/{{row.id}}" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#modaledit{{row.id}}">Edit</a></td>
-                           <td><a href="/deletelocation/{{row.id}}" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Delete ?')">X</a></td>               
-   
+                           <td><a href="/deletelocation/{{row.id}}" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Mark Job as INACTIVE ?')">-</a></td>               
+                           <td><a href="/completelocation/{{row.id}}" class="btn btn-success btn-xs" onclick="return confirm('Are You Sure To Mark Job as COMPLETE ?')">✓</a></td>               
+
                      </tr>
    
    
@@ -90,7 +94,8 @@
                                     <label>Zip Code</label>
                                     <input type="text" class="form-control" name="locationzipcode" value="{{row.locationzipcode}}">
                                  </div>
-            
+
+
 
                                  <div class="input-group mb-3">
                                     <label>Tax Rate:</label><br>
@@ -113,7 +118,8 @@
                         </div>                                     
                      </div>                 
                   </div>
-                   
+                                       {%endif%}
+                                       {%endif%}
                                       {% endfor %}                          
                                   </table>               
                               </div>
@@ -213,6 +219,7 @@
 		   {orderable: false},
          {orderable: false},
 		   {orderable: false, searchable: false},
+         {orderable: false, searchable: false},
 		   {orderable: false, searchable: false}],
       });
     });
