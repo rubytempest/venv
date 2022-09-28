@@ -1,39 +1,36 @@
 {% extends "base.html" %}
-{% block title %}Manage Purchasers Page{% endblock %}
+{% block title %}Manage Contats Page{% endblock %}
 
 {% block content %}
 
 	<div class="row">
 		<div class="col md-10">
 			<div>
-		<h2>Manage Purchasers</h2> <button type="button"  class="btn btn-success float-right" data-toggle="modal" data-target="#mymodal">Add New Location</button> </h2>
+		<h2>Manage Contacts</h2> <button type="button"  class="btn btn-success float-right" data-toggle="modal" data-target="#mymodal">Add New Contact</button> </h2>
 
 	<table id="purchasers" class="table table-striped display no-wrap table-hover table-sm">
       <thead>
             <tr>
-               <th>Purchaser Name</th>
-               <th>Job Site</th>
-               <th>Company</th>
+               <th>Job</th>
+               <th>Contact Name</th>
                <th>Phone</th>
                <th>Email</th>
-               <th>Email 2</th>
-               <th></th>
+               <th>Dept.</th>
                <th>Action</th>
                <th>Delete</th>
             </tr>
          </thead>
-      {% for row in locations %}
+      {% for row in purchasers %}
                      <tr>
-                           <td>{{row.purchasername}}</td>
-                           <td>{{row.purchaserjob}}</td>
-                           <td>{{row.purchasercompany}}</td>
-                           <td>{{row.purchaserphone}}</td>
-                           <td>{{row.purchaseremail}}</td>
-                           <td>{{row.purchaseremail2}}</td>
-                           <td><b>{{row.purchaserposition}} %</b></td>
+                        <td>{{row.purchaserjob}}</td>
+                        <td>{{row.purchasername}}</td>
 
-                           <td><a href="/updatelocation/{{row.id}}" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#modaledit{{row.id}}">Edit</a></td>
-                           <td><a href="/deletelocation/{{row.id}}" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Delete ?')">X</a></td>               
+                        <td>{{row.purchaserphone}}</td>
+                        <td>{{row.purchaseremail}}</td>
+                        <td><b>{{row.purchaserposition}}</b></td>
+
+                        <td><a href="/updatepurchaser/{{row.id}}" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#modaledit{{row.id}}">Edit</a></td>
+                        <td><a href="/deletepurchaser/{{row.id}}" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Delete ?')">X</a></td>               
    
                      </tr>
    
@@ -61,10 +58,6 @@
                                     <label>Job:</label>
                                     <input type="text" class="form-control" name="purchaserjob" value="{{row.purchaserjob}}">
                                  </div>    
-                                 <div class="form-group">                  
-                                    <label>Company</label>
-                                    <input type="text" class="form-control" name="purchasercompany" value="{{row.purchasercompany}}">
-                                 </div>    
 								         <div class="form-group">                  
                                     <label>Phone</label>
                                     <input type="text" class="form-control" name="purchaserphone" value="{{row.purchaserphone}}">
@@ -74,11 +67,7 @@
                                     <input type="text" class="form-control" name="purchaseremail" value="{{row.purchaseremail}}">
                                  </div>   
                                  <div class="form-group">                  
-                                    <label>Email 2</label>
-                                    <input type="text" class="form-control" name="purchaseremail2" value="{{row.purchaseremail2}}">
-                                 </div>   
-                                 <div class="form-group">                  
-                                    <label>Position</label>
+                                    <label>Dept.</label>
                                     <input type="text" class="form-control" name="locationzipcode" value="{{row.purchaserposition}}">
                                  </div>
 
@@ -120,11 +109,7 @@
                                  <div class="form-group">                  
                                     <label>Job:</label>
                                     <input type="text" class="form-control" name="purchaserjob">
-                                 </div>    
-                                 <div class="form-group">                  
-                                    <label>Company</label>
-                                    <input type="text" class="form-control" name="purchasercompany">
-                                 </div>    
+                                 </div>     
 								         <div class="form-group">                  
                                     <label>Phone</label>
                                     <input type="text" class="form-control" name="purchaserphone">
@@ -134,11 +119,7 @@
                                     <input type="text" class="form-control" name="purchaseremail">
                                  </div>   
                                  <div class="form-group">                  
-                                    <label>Email 2</label>
-                                    <input type="text" class="form-control" name="purchaseremail2">
-                                 </div>   
-                                 <div class="form-group">                  
-                                    <label>Position</label>
+                                    <label>Dept.</label>
                                     <input type="text" class="form-control" name="locationzipcode">
                                  </div>
                    

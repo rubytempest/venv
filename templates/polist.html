@@ -64,7 +64,7 @@
 
                      <!--Edit/Review PO Buttons-->
                      {%if row.postatus == "Approved"%}
-                        <td><a href="/poitemsv2/{{row.ponumber}}" class="btn btn-warning btn-xs">Issue PO</a></td>
+                        <td><a href="/poitemscpp/{{row.ponumber}}" class="btn btn-warning btn-xs">View PO</a></td>
                      {%elif row.postatus == "Request for Approval"%}
                         <td><a href="/poitemsv2/{{row.ponumber}}" class="btn btn-warning btn-xs">Review PO</a></td>
                      {%elif row.postatus == "In Progress" or row.postatus == "Rejected"%}

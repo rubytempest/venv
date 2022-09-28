@@ -342,25 +342,6 @@ class SecondaryLocationInfo(db.Model):           #LOCATION MODEL
         self.secondlocationjobnumber = secondlocationjobnumber
         self.secondlocationbelongs = secondlocationbelongs
 
-							   
-												  
-															
-										   
-												
-											 
-											  
-											   
-												 
-
-																																		  
-										  
-										
-												
-											
-											
-											  
-												  
-
 ### LOGIN MANAGEMENT CODE ###
 @login_manager.user_loader
 def load_user(user_id):
@@ -381,15 +362,7 @@ def index():
 @app.route("/receiving", methods=["POST", "GET"])
 @login_required
 def receiving():
-					  
-															
-											
-							
-						
-										  
-
-    all_data = POInfo.query.order_by(POInfo.id.desc()).all()                        #List of PO retrieved and organize = newest first
-						
+    all_data = POInfo.query.order_by(POInfo.id.desc()).all()                        #List of PO retrieved and organize = newest first		
 
     return render_template("receiving.html", pos = all_data)
 
@@ -418,7 +391,6 @@ def recitemsv2(ponumber):
 @app.route("/insertallrecitemsv2", methods=["POST", "GET"])
 def insertallrecitemsv2():
     if request.method == 'POST':
-
 
         ponumber=request.form['ponumber']
         print(ponumber)
@@ -505,7 +477,7 @@ def copypo():
     pojob = request.form['pojob']
     postatus = "In Progress"
     poacccode = request.form['poacccode']
-    pocreated = date.today()
+    pocreated = date.today().strftime('%m-%d-%Y')
     pobuyer = current_user.name
     povendor = my_data.povendor
     pobillto = my_data.pobillto
@@ -732,6 +704,65 @@ def updatelocation():
  
         return redirect(url_for('locations'))
 
+### ROUTES FOR PURCHASERS.HTML ###
+
+#VIEW PURCHASERS.HTML TABLE
+@app.route("/purchasers", methods=["POST", "GET"])
+@login_required
+def purchasers():
+    all_data = PurchasersInfo.query.order_by(PurchasersInfo.purchaserjob.asc()).all()
+
+
+    return render_template("purchasers.html", purchasers = all_data)
+
+#DELETE PURCHASER RECORD
+@app.route('/deletepurchaser/<id>/', methods = ['GET', 'POST'])
+def deletepurchaser(id):
+    my_data = LocationInfo.query.get(id)
+
+    db.session.commit()
+
+    return redirect(url_for('purchasers'))
+
+#CREATE NEW PURCHASER RECORD
+@app.route('/insertpurchaser', methods = ['POST'])
+def insertpurchaser():
+    if request.method == 'POST':
+ 
+        purchasername = request.form['purchasername']
+        purchasercompany = None
+        purchaserjob = request.form['purchaserjob']
+        purchaserphone = request.form['purchaserphone']
+        purchaseremail = request.form['purchaseremail']
+        purchaseremail2 = None
+        purchaserposition = request.form['purchaserposition']
+ 
+        my_data = PurchasersInfo(purchasername, purchaserjob, purchasercompany, purchaserphone, purchaseremail, purchaseremail2, purchaserposition)
+        db.session.add(my_data)
+        db.session.commit()
+
+ 
+        return redirect(url_for('purchasers'))
+
+#UPDATE PURCHASER RECORD
+@app.route('/updatepurchaser', methods = ['GET', 'POST'])
+def updatepurchaser():
+ 
+    if request.method == 'POST':
+        my_data = PurchasersInfo.query.get(request.form.get('id'))         #get information every entry by id from database
+ 
+        my_data.purchasername = request.form['purchasername']
+        my_data.purchaserjob = request.form['purchaserjob']
+        my_data.purchaserphone = request.form['purchaserphone']
+        my_data.purchaseremail = request.form['purchaseremail']
+        my_data.purchaserposition = request.form['purchaserposition']
+ 
+        db.session.commit() 
+
+        return redirect(url_for('purchasers'))
+
+
+
 ##### MANUAL INPUT FOR POITEMS #####
 ####################################
 
@@ -912,14 +943,13 @@ def poitemscp():
     if request.method == 'GET':
         formpo = POForm()
         form=BomForm()
-        form.bomjobnumber.choices = ["----"]+[(bomjobnumber.locationjobnumber) for bomjobnumber in LocationInfo.query.order_by(LocationInfo.locationjobnumber.asc()).all()]
+        form.bomjobnumber.choices = ["----"]+[(bomjobnumber.locationjobnumber) for bomjobnumber in LocationInfo.query.filter(LocationInfo.locationname != "INACTIVE").order_by(LocationInfo.locationjobnumber.asc()).all()]
         today = date.today()
         required=today + datetime.timedelta(days=7)
         hide = 1
-        vendor = VendorsInfo.query.filter_by(vendorname="Airgas USA  LLC").first()
+        vendor = VendorsInfo.query.filter_by(vendorname="Airgas USA LLC").first()
         shipto = LocationInfo.query.filter_by(locationname="Battle Horse").first()
-        buyer = current_user
-
+        buyer = current_user.name
         #Autofill PONUMBER
         lastpo = POInfo.query.order_by(POInfo.id.desc()).first()
         format = lastpo.ponumber.replace("-","")
@@ -929,19 +959,32 @@ def poitemscp():
 
         print(nextpo)
 
-        formpo.povendor.choices = ['---']+[(povendor.vendorname) for povendor in VendorsInfo.query.all()]  #query to populate vendors box
-        formpo.poshipto.choices = [(poshipto.locationname) for poshipto in LocationInfo.query.all()] 
+        #On Site Contacts Information
+        onsitecontact1exists = db.session.query(db.exists().where(PurchasersInfo.purchaserjob == "")).scalar()
+        if onsitecontact1exists:
+            onsitecontact1 = PurchasersInfo.query.filter(PurchasersInfo.purchaserjob == "").order_by(PurchasersInfo.id.asc()).all()
+            empty=[".",".","."]
+            onsitecontact1.append(empty)
+        else:
+            onsitecontact1 = [[".",".","."],[".",".","."]]
 
-        return render_template("poitemscp.html", hide=hide, form=form, formpo=formpo, nextpo=nextpo, vendor=vendor, shipto=shipto, buyer=buyer, today=today)
+        formpo.povendor.choices = ['---']+[(povendor.vendorname) for povendor in VendorsInfo.query.all()]  #query to populate vendors box
+        formpo.poshipto.choices = [(poshipto.locationname) for poshipto in LocationInfo.query.all()]
+        formpo.pobuyer.choices = [current_user.name] + [(pobuyer.purchasername) for pobuyer in PurchasersInfo.query.all()]
+ 
+
+        return render_template("poitemscp.html", onsitecontact1=onsitecontact1, hide=hide, form=form, formpo=formpo, nextpo=nextpo, vendor=vendor, shipto=shipto, buyer=buyer, today=today)
 
     if request.method == 'POST':
         jobnumber = request.form['bomjobnumber']
 
         hide = 0
         formpo = POForm()
-        form=BomForm()
-        form.bomjobnumber.choices = [(bomjobnumber.locationjobnumber) for bomjobnumber in LocationInfo.query.all()]
+        form = BomForm()
+
+        form.bomjobnumber.choices = [(bomjobnumber.locationjobnumber) for bomjobnumber in LocationInfo.query.filter(LocationInfo.locationname != "INACTIVE").order_by(LocationInfo.locationjobnumber.asc()).all()]
         vendor = request.form['povendor']
+        buyer = request.form['pobuyer']
         print(vendor)
 
         today=date.today()
@@ -956,8 +999,6 @@ def poitemscp():
 
         if secondshipto != '-':
             shipto = LocationInfo.query.filter_by(locationjobnumber=secondshipto).first()
-        
-        buyer = current_user
 
         ponumber = request.form['ponumber']
         if ponumber == "000":
@@ -975,12 +1016,93 @@ def poitemscp():
         else:
             nextpo= ponumber
 
-        formpo.povendor.choices = ['---']+[(povendor.vendorname) for povendor in VendorsInfo.query.all()]  #query to populate vendors box
+        #On Site Contacts Information
+        onsitecontact1exists = db.session.query(db.exists().where(PurchasersInfo.purchaserjob == jobnumber)).scalar()
+        if onsitecontact1exists:
+            onsitecontact1 = PurchasersInfo.query.filter(PurchasersInfo.purchaserjob == jobnumber).order_by(PurchasersInfo.id.asc()).all()
+            empty=[".",".","."]
+            onsitecontact1.append(empty)
+        else:
+            onsitecontact1 = [[".",".","."],[".",".","."]]
+
+        formpo.povendor.choices = [(povendor.vendorname) for povendor in VendorsInfo.query.all()]  #query to populate vendors box
         formpo.poshipto.choices = [jobnumber]+[(poshipto.locationjobnumber) for poshipto in LocationInfo.query.all()] 
+        formpo.pobuyer.choices = [current_user.name] + [(pobuyer.purchasername) for pobuyer in PurchasersInfo.query.all()]
 
 
-        return render_template("poitemscp.html",required=required,hide=hide, vendor=vendor, form=form, formpo=formpo, poitems=poitems, nextpo=nextpo, shipto=shipto, buyer=buyer, today=today, pojob=jobnumber)
+        return render_template("poitemscp.html",required=required, onsitecontact1=onsitecontact1, buyer=buyer, hide=hide, vendor=vendor, form=form, formpo=formpo, poitems=poitems, nextpo=nextpo, shipto=shipto, today=today, pojob=jobnumber)
 
+##POITEMSCPP RESERVE PO BUTTON
+@app.route("/poitemscppreserve", methods=["POST", "GET"])
+def poitemscppreserve():
+    if request.method == 'POST':
+        ponumber = request.form['ponumber']
+
+        exists = db.session.query(db.exists().where(POInfo.ponumber == ponumber)).scalar()    #QUERE TO CHECK IF PONUM. ALREADY EXISTS IN DATABASE
+        if exists:
+            flash("Selected PO# already exists in database")
+            return redirect(url_for('poitemscp'))
+
+        povendor = request.form['povendor']
+
+        pojob = request.form['pojob']
+        poskid = None
+        pocreated = date.today().strftime('%m-%d-%Y')
+        pobuyer = request.form['pobuyer']
+        pojobtype = None
+
+        poacccode = None
+        pobillto = "Premier Plant Services LLC"
+        poshipto = request.form['poshipto']
+        popayment = "NET 30"
+        potaxstatus = "Taxable"
+        postatus = "Approved"
+        porejectednotes = ""
+
+        pojobtype = "Field\\Fabrication Job"
+
+        poshipping = 0
+
+        posubtotal = 0
+        pototal = 0
+        pocreatedby = current_user.name
+
+        if pojobtype == "Corporate Office":
+            pojobtypenum = "10"
+        elif pojobtype == "Fabrication Shop":
+            pojobtypenum = "90"
+        elif pojobtype == "Field\\Fabrication Job":
+            pojobtypenum = "30"
+        elif pojobtype == "Insulation":
+            pojobtypenum = "50"
+        elif pojobtype == "Paint Shop":
+            pojobtypenum = "60"
+        elif pojobtype == "Texas Office":
+            pojobtypenum = "20"
+        
+
+        print(poshipto)
+        #Calculate tax rate
+        vendor = VendorsInfo.query.filter_by(vendorname=povendor).first()
+        receiving = LocationInfo.query.filter_by(locationname=poshipto).first()
+
+        if vendor.vendorstate == 'OK' and receiving.locationstate == 'TX':
+            potaxrate = vendor.vendortaxrate
+        elif vendor.vendorstate != 'OK' and receiving.locationstate == 'OK':
+            potaxrate = receiving.locationtaxrate
+        else: 
+            potaxrate = receiving.locationtaxrate
+
+        if receiving.locationtaxrate == 0:
+            potaxrate = 0
+
+        my_data = POInfo(ponumber, pojob, postatus, poacccode, pocreated, pobuyer, povendor, pobillto, poshipto, popayment, poshipping, potaxstatus, potaxrate, posubtotal, pototal, pocreatedby, poskid, pojobtype, pojobtypenum, porejectednotes)
+        db.session.add(my_data)
+        db.session.commit()
+
+        flash("PO #" + ponumber + " has been reserved successfully!")
+
+        return redirect(url_for('poitemscp'))
 
 #UNUSED ROUTE -- POITEMSCPP(LEGACY) - MANUAL COPY PASTE SINGLE LINE
 @app.route("/poitemscpposave", methods=["POST", "GET"])
@@ -990,67 +1112,68 @@ def poitemscpposave():
 
         exists = db.session.query(db.exists().where(POInfo.ponumber == ponumber)).scalar()    #QUERE TO CHECK IF PONUM. ALREADY EXISTS IN DATABASE
         if exists:
-            return 'Selected PO# already exists in database'
-        else:
+            flash("Selected PO# already exists in database")
+            return redirect(url_for('poitemscp'))
 
-            pojob = request.form['pojob']
-            poskid = None
-            pocreated = date.today()
-            pobuyer = current_user.name
-            povendor = request.form['povendor']
-            pojobtype = None
+        povendor = request.form['povendor']
 
-            poacccode = None
-            pobillto = "Premier Plant Services LLC"
-            poshipto = request.form['poshipto']
-            popayment = "NET 30"
-            potaxstatus = "Taxable"
-            postatus = "Approved"
-            porejectednotes = ""
+        pojob = request.form['pojob']
+        poskid = None
+        pocreated = date.today().strftime('%m-%d-%Y')
+        pobuyer = request.form['pobuyer']
+        pojobtype = None
 
-            pojobtype = "Field\\Fabrication Job"
+        poacccode = None
+        pobillto = "Premier Plant Services LLC"
+        poshipto = request.form['poshipto']
+        popayment = "NET 30"
+        potaxstatus = "Taxable"
+        postatus = "Approved"
+        porejectednotes = ""
 
-            poshipping = 0
+        pojobtype = "Field\\Fabrication Job"
 
-            posubtotal = 0
-            pototal = 0
-            pocreatedby = current_user.name
+        poshipping = 0
 
-            if pojobtype == "Corporate Office":
-                pojobtypenum = "10"
-            elif pojobtype == "Fabrication Shop":
-                pojobtypenum = "90"
-            elif pojobtype == "Field\\Fabrication Job":
-                pojobtypenum = "30"
-            elif pojobtype == "Insulation":
-                pojobtypenum = "50"
-            elif pojobtype == "Paint Shop":
-                pojobtypenum = "60"
-            elif pojobtype == "Texas Office":
-                pojobtypenum = "20"
-            
+        posubtotal = 0
+        pototal = 0
+        pocreatedby = current_user.name
 
-            print(poshipto)
-            #Calculate tax rate
-            vendor = VendorsInfo.query.filter_by(vendorname=povendor).first()
-            receiving = LocationInfo.query.filter_by(locationname=poshipto).first()
+        if pojobtype == "Corporate Office":
+            pojobtypenum = "10"
+        elif pojobtype == "Fabrication Shop":
+            pojobtypenum = "90"
+        elif pojobtype == "Field\\Fabrication Job":
+            pojobtypenum = "30"
+        elif pojobtype == "Insulation":
+            pojobtypenum = "50"
+        elif pojobtype == "Paint Shop":
+            pojobtypenum = "60"
+        elif pojobtype == "Texas Office":
+            pojobtypenum = "20"
+        
 
-            if vendor.vendorstate == 'OK' and receiving.locationstate == 'TX':
-                potaxrate = vendor.vendortaxrate
-            elif vendor.vendorstate != 'OK' and receiving.locationstate == 'OK':
-                potaxrate = receiving.locationtaxrate
-            else: 
-                potaxrate = receiving.locationtaxrate
+        print(poshipto)
+        #Calculate tax rate
+        vendor = VendorsInfo.query.filter_by(vendorname=povendor).first()
+        receiving = LocationInfo.query.filter_by(locationname=poshipto).first()
 
-            if receiving.locationtaxrate == 0:
-                potaxrate = 0
+        if vendor.vendorstate == 'OK' and receiving.locationstate == 'TX':
+            potaxrate = vendor.vendortaxrate
+        elif vendor.vendorstate != 'OK' and receiving.locationstate == 'OK':
+            potaxrate = receiving.locationtaxrate
+        else: 
+            potaxrate = receiving.locationtaxrate
 
-            my_data = POInfo(ponumber, pojob, postatus, poacccode, pocreated, pobuyer, povendor, pobillto, poshipto, popayment, poshipping, potaxstatus, potaxrate, posubtotal, pototal, pocreatedby, poskid, pojobtype, pojobtypenum, porejectednotes)
-            db.session.add(my_data)
-            db.session.commit()
-    
-            
-            return redirect(url_for('poitemscpp', ponumber=ponumber))
+        if receiving.locationtaxrate == 0:
+            potaxrate = 0
+
+        my_data = POInfo(ponumber, pojob, postatus, poacccode, pocreated, pobuyer, povendor, pobillto, poshipto, popayment, poshipping, potaxstatus, potaxrate, posubtotal, pototal, pocreatedby, poskid, pojobtype, pojobtypenum, porejectednotes)
+        db.session.add(my_data)
+        db.session.commit()
+
+        
+        return redirect(url_for('poitemscpp', ponumber=ponumber))
 
 #DELETE POITEMSCPP
 @app.route('/deletepoitemcpp/<id>/', methods = ['GET', 'POST'])
@@ -1088,7 +1211,8 @@ def poitemscpp(ponumber):
     formexcel = ItemsForm()
 
     form.bomjobnumber.choices = [(bomjobnumber.locationjobnumber) for bomjobnumber in LocationInfo.query.all()]
-    today=date.today()
+    today=po.pocreated.strftime('%m-%d-%Y')             #Change date display to american format
+    print(today)
 
     poitems = POItemsInfo.query.filter(POItemsInfo.poitempo == po.ponumber).order_by(POItemsInfo.id.asc()).all()
     
@@ -1099,11 +1223,13 @@ def poitemscpp(ponumber):
 
     vendor = VendorsInfo.query.filter_by(vendorname=po.povendor).first()
     shipto = LocationInfo.query.filter_by(locationname=po.poshipto).first()
-    buyer = current_user
+    buyer= current_user.name
+
+    purchaser = PurchasersInfo.query.filter(PurchasersInfo.purchasername == po.pobuyer).first()
 
     formpo.povendor.choices = [(povendor.vendorname) for povendor in VendorsInfo.query.all()]  #query to populate vendors box
 
-    return render_template("poitemscpp.html", formexcel=formexcel, subtotal=subtotal, form=form, formpo=formpo, poitems=poitems, vendor=vendor, shipto=shipto, buyer=buyer, today=today, po=po)
+    return render_template("poitemscpp.html", formexcel=formexcel, purchaser=purchaser, subtotal=subtotal, form=form, formpo=formpo, poitems=poitems, vendor=vendor, shipto=shipto, buyer=buyer, today=today, po=po)
 
 ### ADD POITEMSCPP ITEM SINGLE ###
 
@@ -1668,7 +1794,7 @@ def bomrequest():
     pojob = bomjobnumber
     poacccode = None
     postatus = "REQUEST FOR QUOTE"
-    pocreated = date.today()
+    pocreated = date.today().strftime('%m-%d-%Y')
     pobuyer = current_user.name
     povendor = None
     pobillto = None
@@ -1738,7 +1864,7 @@ def initializebompo():
     my_data = POInfo.query.get(request.form.get('id'))
     ponumber = request.form['ponumber']
 
-    my_data.pocreated = date.today()
+    my_data.pocreated = date.today().strftime('%m-%d-%Y')
     my_data.pojobtype = 'Field\\Fabrication Job'
     my_data.povendor = request.form['povendor']
     my_data.pojobtypenum = 30
@@ -2118,7 +2244,7 @@ def podownload():
     if request.method == 'POST':
         id = request.form['id']
         my_data = POInfo.query.get(id)
-        return send_file("/test/venv/pdf/po_report"+ str(my_data.ponumber) + ".pdf", as_attachment=True)
+        return send_file("/test/venv/pdf/po_report-"+ str(my_data.ponumber) + ".pdf", as_attachment=True)
 
 #PODOWNLOADATTACHMENT
 @app.route('/podownloadattachment', methods = ['GET', 'POST'])
@@ -2274,7 +2400,9 @@ def isti_po_format1(ponumber):
     subtotal = round(subtotal,2)
     total = round(total, 2)
 
-    return render_template("isti_po_format1.html" , poitems = all_data, po=po, vendor=vendor, shipto=shipto, buyer=buyer, subtotal=subtotal, taxed=taxed, total=total, notes=notes)
+    podate = po.pocreated.strftime('%m-%d-%Y')
+
+    return render_template("isti_po_format1.html" , poitems = all_data, po=po, vendor=vendor, shipto=shipto, buyer=buyer, subtotal=subtotal, taxed=taxed, total=total, notes=notes, podate=podate)
 
 ### GENERATING RECEIVING PDF COPY OF PO ####
 @app.route('/isti_po_format_priceless/<ponumber>')
@@ -2359,6 +2487,13 @@ def pdf(ponumber):                                      #Function to print repor
     path_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
     config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
     pdfkit.from_url("http://127.0.0.1:5000/isti_po_format1/" + str(ponumber), "C:/test/venv/pdf/po_report"+ str(ponumber) + ".pdf", configuration=config)
+
+    #Code to add ISTI T&C to pdf
+    merger = PdfMerger()
+    merger.append("C:/test/venv/pdf/po_report"+ str(ponumber) + ".pdf")
+    merger.append("C:/test/venv/permanent/istiTC.pdf")
+    merger.write("C:/test/venv/pdf/po_report-"+ str(ponumber) + ".pdf")
+    merger.close()
     #pdfkit.from_url("LOCATION OF URL TO TRANSFORM", LOCATION+NAME OF NEW FILE (IN ROOT IF ONLY NAME PROVIDED), CONFIGURATION)
 
 def pdfnoprice(ponumber):                                      #Function to print report pdf once it gets approved

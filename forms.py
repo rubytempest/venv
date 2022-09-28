@@ -27,7 +27,7 @@ class RegistrationForm(FlaskForm):
 class POForm(FlaskForm):
     pojob = SelectField('Job #', validators=[InputRequired()], choices=[])
     ponumber = StringField('PO #', default=random() , validators=[DataRequired()])
-    poacccode = SelectField("Account Code", choices=[('0.06.40-FlowInstructables'),('0.74.17-PocketEdition'),('1.41.97-LowIncome')])
+    poacccode = SelectField("Account Code", choices=[('Construction Equipment'),('Fuel'),('Repairs & Maintenance'),('Dyed Diesel Fuel'),('1.41.97-LowIncome')])
     pocreated = DateField("Creation Date", default=datetime.today, validators=[DataRequired()])  #date field default today
     pobuyer = SelectField('Buyer', choices=[])
     povendor = SelectField('Vendor', choices=[], validators=[DataRequired()])  #choices are left empty if intended to be filled with database information
