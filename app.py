@@ -1,4 +1,4 @@
-from flask import Flask, render_template, make_response, flash, request, redirect, url_for, send_file    #imports required to navigate through pages
+from flask import Flask, render_template, make_response, flash, request, redirect, url_for, send_file
 from forms import LoginForm, RegistrationForm, POForm, LocationsForm, VendorsForm, ItemsForm, POItemsForm, BomForm, ReceivingForm                                #imports for WTForms
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash, generate_password_hash       #imports for password security
@@ -86,8 +86,9 @@ class VendorsInfo(db.Model):                            #VENDORS MODELS
     vendorcostcode = db.Column(db.String(10))
     vendoroknexus = db.Column(db.Boolean, default = False)
     vendortxnexus = db.Column(db.Boolean, default = False)
+    vendornotes = db.Column(db.Text)
  
-    def __init__(self, vendorname, vendornumber, vendoraddress1, vendoraddress2, vendorcity, vendorsate, vendorzipcode, vendorcontact, vendorphone, vendormemail, vendortaxrate, vendorpaymentterm, vendorcostcode, vendoroknexus, vendortxnexus):
+    def __init__(self, vendorname, vendornumber, vendoraddress1, vendoraddress2, vendorcity, vendorsate, vendorzipcode, vendorcontact, vendorphone, vendormemail, vendortaxrate, vendorpaymentterm, vendorcostcode, vendoroknexus, vendortxnexus, vendornotes):
         self.vendorname = vendorname
         self.vendornumber = vendornumber
         self.vendoraddress1 = vendoraddress1
@@ -103,6 +104,7 @@ class VendorsInfo(db.Model):                            #VENDORS MODELS
         self.vendorcostcode = vendorcostcode
         self.vendoroknexus = vendoroknexus
         self.vendortxnexus = vendortxnexus
+        self.vendornotes = vendornotes
 
 
 class LocationInfo(db.Model):           #LOCATION MODEL
@@ -156,10 +158,10 @@ class RevisionsInfo(db.Model):           #POREVISIONS MODEL
     revisionnotes = db.Column(db.String(300))
     revisiondate = db.Column (db.Date)
 
-    def __init__(self, porevisionorigin, porevisionnumber, porevisionnotes, revisiondate):
-        self.porevisionorigin = porevisionorigin
-        self.poreporevisionnumber = porevisionnumber
-        self.porevisionnotes = porevisionnotes
+    def __init__(self, revisionspo, revisionnumber, revisionnotes, revisiondate):
+        self.revisionspo = revisionspo
+        self.revisionnumber = revisionnumber
+        self.revisionnotes = revisionnotes
         self.revisiondate = revisiondate
 
 class BackordersInfo(db.Model):           
@@ -239,9 +241,11 @@ class POInfo(db.Model):
     pojobtype = db.Column(db.String(100))
     pojobtypenum = db.Column(db.String(10))
     porejectednotes = db.Column(db.Text())
+    pospecialnotes = db.Column(db.Text)
+    poshippingnotes = db.Column(db.Text)
 
 
-    def __init__(self, ponumber, pojob, postatus, poacccode, pocreated, pobuyer, povendor, pobillto, poshipto, popayment, poshipping, potaxstatus, potaxrate, posubtotal, pototal, pocreatedby, poskid, pojobtype, pojobtypenum, porejectednotes):
+    def __init__(self, ponumber, pojob, postatus, poacccode, pocreated, pobuyer, povendor, pobillto, poshipto, popayment, poshipping, potaxstatus, potaxrate, posubtotal, pototal, pocreatedby, poskid, pojobtype, pojobtypenum, porejectednotes, pospecialnotes, poshippingnotes):
         self.ponumber = ponumber
         self.pojob = pojob
         self.poacccode = poacccode
@@ -263,6 +267,8 @@ class POInfo(db.Model):
         self.pojobtype = pojobtype
         self.pojobtypenum = pojobtypenum
         self.porejectednotes = porejectednotes
+        self.pospecialnotes = pospecialnotes
+        self.poshippingnotes = poshippingnotes
 
 class PurchasersInfo(db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -927,14 +933,44 @@ def deletepoitemsmanual(id):
     return redirect(url_for('poitemsmanual', ponumber=my_data.poitempo))
 
 
-
-
-
-
-
 ########################################################################################
 ##############################POITEMSCP ROUTES##########################################
 ########################################################################################
+
+## POREVISION
+@app.route("/porevision", methods=["POST", "GET"])
+def porevision():
+
+    revisionspo = request.form["revisionspo"]
+
+    poexists = db.session.query(db.exists().where(POInfo.ponumber == revisionspo)).scalar()
+    if poexists:
+        revisionnumber = request.form['revisionnumber']
+        revisionnotes = request.form['revisionnotes']
+        revisiondate = None
+
+        my_data = RevisionsInfo(revisionspo, revisionnumber, revisionnotes, revisiondate)
+        db.session.add(my_data)
+        db.session.commit()
+
+        flash("Revision " + revisionnumber + " has been added to PO#" + revisionspo)
+        return redirect(url_for("poitemscp"))
+
+    else:
+        flash("ERROR: Selected PO# does not exist!", 'error')
+        return redirect(url_for("poitemscp"))
+
+
+    #    onsitecontact1 = PurchasersInfo.query.filter(PurchasersInfo.purchaserjob == "").order_by(PurchasersInfo.id.asc()).all()
+    #    empty=[".",".","."]
+    #    onsitecontact1.append(empty)
+    #else:
+    #    onsitecontact1 = [[".",".","."],[".",".","."]]
+
+
+    #return render_template("poitemscp.html", onsitecontact1=onsitecontact1, hide=hide, form=form, formpo=formpo, nextpo=nextpo, vendor=vendor, shipto=shipto, buyer=buyer, today=today)
+
+
 
 ### VIEW POITEMSCP.HTML ###
 @app.route("/poitemscp", methods=["POST", "GET"])
@@ -950,6 +986,11 @@ def poitemscp():
         vendor = VendorsInfo.query.filter_by(vendorname="Airgas USA LLC").first()
         shipto = LocationInfo.query.filter_by(locationname="Battle Horse").first()
         buyer = current_user.name
+        specialnotes = ""
+        shippingnotes = ""
+
+
+
         #Autofill PONUMBER
         lastpo = POInfo.query.order_by(POInfo.id.desc()).first()
         format = lastpo.ponumber.replace("-","")
@@ -990,10 +1031,13 @@ def poitemscp():
         today=date.today()
         required=today + datetime.timedelta(days=7)
 
+        specialnotes = request.form['pospecialnotes']
+        shippingnotes = request.form['poshippingnotes']
+
         poitems = POItemsInfo.query.filter(POItemsInfo.poitempo == "90865092834750982").all()
         secondshipto = request.form['poshipto']
 
-        print(jobnumber, secondshipto)
+        print(specialnotes)
 
         shipto = LocationInfo.query.filter_by(locationjobnumber=jobnumber).first()
 
@@ -1026,11 +1070,97 @@ def poitemscp():
             onsitecontact1 = [[".",".","."],[".",".","."]]
 
         formpo.povendor.choices = [(povendor.vendorname) for povendor in VendorsInfo.query.all()]  #query to populate vendors box
-        formpo.poshipto.choices = [jobnumber]+[(poshipto.locationjobnumber) for poshipto in LocationInfo.query.all()] 
+        formpo.poshipto.choices = [jobnumber]+[(poshipto.locationjobnumber) for poshipto in LocationInfo.query.filter(LocationInfo.locationname != "INACTIVE").order_by(LocationInfo.locationjobnumber.asc()).all()] 
         formpo.pobuyer.choices = [current_user.name] + [(pobuyer.purchasername) for pobuyer in PurchasersInfo.query.all()]
+        formpo.povendornotes.choices = [(povendornotes.vendornotes) for povendornotes in VendorsInfo.query.all()]  #query to populate vendors box
+
+        return render_template("poitemscp.html", shippingnotes=shippingnotes, specialnotes=specialnotes, required=required, onsitecontact1=onsitecontact1, buyer=buyer, hide=hide, vendor=vendor, form=form, formpo=formpo, poitems=poitems, nextpo=nextpo, shipto=shipto, today=today, pojob=jobnumber)
+
+### POITEMSCPPEDIT.HTML
+
+@app.route("/poitemscppedit/<ponumber>", methods=["POST", "GET"])
+def poitemscppedit(ponumber):
+
+        ponumber = ponumber                                       
+        descending = POInfo.query.filter(POInfo.ponumber == ponumber)
+        po = descending.first()
+
+        jobnumber = po.pojob
+
+        hide = 0
+        formpo = POForm()
+        form = BomForm()
+
+        form.bomjobnumber.choices = [(bomjobnumber.locationjobnumber) for bomjobnumber in LocationInfo.query.filter(LocationInfo.locationname != "INACTIVE").order_by(LocationInfo.locationjobnumber.asc()).all()]
+        vendor = po.povendor
+        buyer = po.pobuyer
+
+        today= po.pocreated
+        required=today + datetime.timedelta(days=7)
+
+        poitems = POItemsInfo.query.filter(POItemsInfo.poitempo == "90865092834750982").all()
+        secondshipto = po.poshipto
+
+        print(jobnumber, secondshipto)
+
+        shipto = LocationInfo.query.filter_by(locationjobnumber=jobnumber).first()
+
+        if secondshipto != '-':
+            shipto = LocationInfo.query.filter_by(locationjobnumber=secondshipto).first()
+
+        if ponumber == "000":
+            #Autofill PONUMBER
+            lastpo = POInfo.query.filter(POInfo.pojob == jobnumber).order_by(POInfo.ponumber.desc()).first()
+            if lastpo == None:
+                nextpo = jobnumber + '-001'
+            else:
+                format = lastpo.ponumber.replace("-","")
+                nextpo = int(format) + 1
+                print(format)
+                print(nextpo)
+                nextpo = str(nextpo)
+                nextpo = jobnumber + '-' + nextpo[4:]
+        else:
+            nextpo= ponumber
+
+        #On Site Contacts Information
+        onsitecontact1exists = db.session.query(db.exists().where(PurchasersInfo.purchaserjob == jobnumber)).scalar()
+        if onsitecontact1exists:
+            onsitecontact1 = PurchasersInfo.query.filter(PurchasersInfo.purchaserjob == jobnumber).order_by(PurchasersInfo.id.asc()).all()
+            empty=[".",".","."]
+            onsitecontact1.append(empty)
+        else:
+            onsitecontact1 = [[".",".","."],[".",".","."]]
 
 
-        return render_template("poitemscp.html",required=required, onsitecontact1=onsitecontact1, buyer=buyer, hide=hide, vendor=vendor, form=form, formpo=formpo, poitems=poitems, nextpo=nextpo, shipto=shipto, today=today, pojob=jobnumber)
+        formpo.povendor.choices = [po.povendor] + [(povendor.vendorname) for povendor in VendorsInfo.query.all()]  #query to populate vendors box
+        formpo.poshipto.choices = [po.poshipto]+[(poshipto.locationname) for poshipto in LocationInfo.query.filter(LocationInfo.locationname != "INACTIVE").order_by(LocationInfo.locationname.asc()).all()] 
+        formpo.pobuyer.choices = [po.pobuyer] + [(pobuyer.purchasername) for pobuyer in PurchasersInfo.query.all()]
+        formpo.povendornotes.choices =  [(povendornotes.vendornotes) for povendornotes in VendorsInfo.query.all()]  #query to populate vendors box
+
+        return render_template("poitemscppedit.html", po=po, required=required, onsitecontact1=onsitecontact1, buyer=buyer, hide=hide, vendor=vendor, form=form, formpo=formpo, poitems=poitems, nextpo=nextpo, shipto=shipto, today=today, pojob=jobnumber)
+
+
+## UPDATE POITEMSCPP
+
+@app.route("/poitemscppupdate", methods=["POST", "GET"])
+def poitemscppupdate():
+
+    my_data = POInfo.query.get(request.form.get('id'))
+
+    my_data.pocreated = request.form['pocreated']
+    my_data.pobuyer = request.form['pobuyer']
+    my_data.povendor = request.form['povendor']
+    my_data.poshipto = request.form['poshipto']
+    my_data.poshippingnotes = request.form['poshippingnotes']
+    my_data.pospecialnotes = request.form['pospecialnotes']
+    my_data.poacccode = request.form['poaccountcode']
+ 
+    db.session.commit()
+
+    return redirect(url_for('poitemscpp', ponumber=my_data.ponumber))
+
+
 
 ##POITEMSCPP RESERVE PO BUTTON
 @app.route("/poitemscppreserve", methods=["POST", "GET"])
@@ -1047,7 +1177,7 @@ def poitemscppreserve():
 
         pojob = request.form['pojob']
         poskid = None
-        pocreated = date.today().strftime('%m-%d-%Y')
+        pocreated = date.today()
         pobuyer = request.form['pobuyer']
         pojobtype = None
 
@@ -1096,7 +1226,10 @@ def poitemscppreserve():
         if receiving.locationtaxrate == 0:
             potaxrate = 0
 
-        my_data = POInfo(ponumber, pojob, postatus, poacccode, pocreated, pobuyer, povendor, pobillto, poshipto, popayment, poshipping, potaxstatus, potaxrate, posubtotal, pototal, pocreatedby, poskid, pojobtype, pojobtypenum, porejectednotes)
+        pospecialnotes = request.form['pospecialnotes']
+        poshippingnotes = request.form['poshippingnotes']
+
+        my_data = POInfo(ponumber, pojob, postatus, poacccode, pocreated, pobuyer, povendor, pobillto, poshipto, popayment, poshipping, potaxstatus, potaxrate, posubtotal, pototal, pocreatedby, poskid, pojobtype, pojobtypenum, porejectednotes, pospecialnotes, poshippingnotes)
         db.session.add(my_data)
         db.session.commit()
 
@@ -1119,7 +1252,7 @@ def poitemscpposave():
 
         pojob = request.form['pojob']
         poskid = None
-        pocreated = date.today().strftime('%m-%d-%Y')
+        pocreated = date.today()
         pobuyer = request.form['pobuyer']
         pojobtype = None
 
@@ -1168,7 +1301,10 @@ def poitemscpposave():
         if receiving.locationtaxrate == 0:
             potaxrate = 0
 
-        my_data = POInfo(ponumber, pojob, postatus, poacccode, pocreated, pobuyer, povendor, pobillto, poshipto, popayment, poshipping, potaxstatus, potaxrate, posubtotal, pototal, pocreatedby, poskid, pojobtype, pojobtypenum, porejectednotes)
+        pospecialnotes = request.form['pospecialnotes']
+        poshippingnotes = request.form['poshippingnotes']
+
+        my_data = POInfo(ponumber, pojob, postatus, poacccode, pocreated, pobuyer, povendor, pobillto, poshipto, popayment, poshipping, potaxstatus, potaxrate, posubtotal, pototal, pocreatedby, poskid, pojobtype, pojobtypenum, porejectednotes, pospecialnotes, poshippingnotes)
         db.session.add(my_data)
         db.session.commit()
 
@@ -1223,13 +1359,26 @@ def poitemscpp(ponumber):
 
     vendor = VendorsInfo.query.filter_by(vendorname=po.povendor).first()
     shipto = LocationInfo.query.filter_by(locationname=po.poshipto).first()
-    buyer= current_user.name
+    buyer= current_user
 
     purchaser = PurchasersInfo.query.filter(PurchasersInfo.purchasername == po.pobuyer).first()
 
+        #On Site Contacts Information
+    onsitecontact1exists = db.session.query(db.exists().where(PurchasersInfo.purchaserjob == "")).scalar()
+    if onsitecontact1exists:
+        onsitecontact1 = PurchasersInfo.query.filter(PurchasersInfo.purchaserjob == "").order_by(PurchasersInfo.id.asc()).all()
+        empty=[".",".","."]
+        onsitecontact1.append(empty)
+    else:
+        onsitecontact1 = [[".",".","."],[".",".","."]]
+
+        formpo.povendor.choices = ['---']+[(povendor.vendorname) for povendor in VendorsInfo.query.all()]  #query to populate vendors box
+        formpo.poshipto.choices = [(poshipto.locationname) for poshipto in LocationInfo.query.all()]
+        formpo.pobuyer.choices = [current_user.name] + [(pobuyer.purchasername) for pobuyer in PurchasersInfo.query.all()]
+
     formpo.povendor.choices = [(povendor.vendorname) for povendor in VendorsInfo.query.all()]  #query to populate vendors box
 
-    return render_template("poitemscpp.html", formexcel=formexcel, purchaser=purchaser, subtotal=subtotal, form=form, formpo=formpo, poitems=poitems, vendor=vendor, shipto=shipto, buyer=buyer, today=today, po=po)
+    return render_template("poitemscpp.html", onsitecontact1=onsitecontact1, formexcel=formexcel, purchaser=purchaser, subtotal=subtotal, form=form, formpo=formpo, poitems=poitems, vendor=vendor, shipto=shipto, buyer=buyer, today=today, po=po)
 
 ### ADD POITEMSCPP ITEM SINGLE ###
 
@@ -1275,20 +1424,6 @@ def poitemscpinsert():
     print("receiving pdf copy created")
 
     return redirect(url_for('poitemscpp', ponumber=poitempo))
-
-																										   
-																		  
-															   
-																																						 
-																															  
-
-																												  
-																		  
-															   
-																																									 
-																															  
-
-
 
 ###POITEMSCPINSERTCELL INITIALIZATION UPDATING QUANTITY FIELD
 @app.route("/poitemscpinsertcell", methods=["POST", "GET"])
@@ -1357,18 +1492,6 @@ def poitemeditcell():
     return redirect(url_for('poitemscpp', ponumber=poitempo))
 
 																										   
-																		  
-															   
-																																						 
-																															  
-
-																												  
-																		  
-															   
-																																									 
-																															  
-
-
 #### VIEW POITEMSV2 TABLE ####
 @app.route("/poitemsv2/<ponumber>", methods=["POST", "GET"])
 def poitemsv2(ponumber):
@@ -1479,14 +1602,11 @@ def insertvendor():
         vendorphone = request.form['vendorphone']
         vendormemail = request.form['vendormemail']
         vendortaxrate = request.form['vendortaxrate']
+        vendornotes = request.form['vendornotes']
  
-        my_data = VendorsInfo(vendorname, vendornumber, vendoraddress1, vendoraddress2, vendorcity, vendorstate, vendorzipcode, vendorcontact, vendorphone, vendormemail, vendortaxrate)
+        my_data = VendorsInfo(vendorname, vendornumber, vendoraddress1, vendoraddress2, vendorcity, vendorstate, vendorzipcode, vendorcontact, vendorphone, vendormemail, vendortaxrate, vendornotes)
         db.session.add(my_data)
         db.session.commit()
- 
-
-
-
  
         return redirect(url_for('vendors'))
 
@@ -1508,6 +1628,7 @@ def updatevendor():
         my_data.vendorphone = request.form['vendorphone']
         my_data.vendormemail = request.form['vendormemail']
         my_data.vendortaxrate = request.form['vendortaxrate']
+        my_data.vendornotes = request.form['vendornotes']
  
         db.session.commit()
  
@@ -2179,8 +2300,10 @@ def flatfilepoexport():
     flatfileponumber = request.form['flatfileponumber']
     poitems = POItemsInfo.query.filter_by(poitempo = flatfileponumber).order_by(POItemsInfo.id.asc()).all()
     po = POInfo.query.filter_by(ponumber = flatfileponumber).first()
+    shipto = LocationInfo.query.filter_by(locationname=po.poshipto).first()
 
-    header =  ["Vendor","Job","Date","PO No.","Item","Description","Qty.","Rate","Unit","Amount","Tax"]    
+
+    header =  ["Vendor","Job","Date","PO No.","Item","Description","Qty.","Rate","Unit","Amount","Tax"," ","Shipping"]    
 
     with open(str(flatfileponumber) + " FF" + '.csv', 'w', encoding='UTF8', newline='') as f:                      #Generate CSV file, writing mode, dont skip in new line
         writer = csv.writer(f)                                                  #Start writer mode
@@ -2190,7 +2313,7 @@ def flatfilepoexport():
         formattaxrate = format(po.potaxrate, '.4f')                         #Add 4 decimal places to tax rate
         print(formattaxrate)
         for row in poitems:
-            data = [row.poitemvendor,row.poitemjobtype,row.poitemdate,row.poitempo,str(row.poitemjobtypenumber) + str(row.poitemcostcode), row.poitemdescription, row.poitemquantity, "$" + str(row.poitemprice), row.poitemunit, "$" + str(row.poitemtotalprice), str(formattaxrate) + "%"]
+            data = [row.poitemvendor,row.poitemjobtype,row.poitemdate,row.poitempo,str(row.poitemjobtypenumber) + str(row.poitemcostcode), row.poitemdescription, row.poitemquantity, "$" + str(row.poitemprice), row.poitemunit, "$" + str(row.poitemtotalprice), str(formattaxrate) + "%", "", shipto.locationname + "-" + shipto.locationaddress + " " + shipto.locationcity + "," + shipto.locationstate + " " + shipto.locationzipcode]
             writer.writerow(data)
     
     #Code to convert csv file to xlsx

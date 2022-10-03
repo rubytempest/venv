@@ -6,6 +6,8 @@
    <div class="row">
       <div class="col-md-auto">
          <h2 id="top">PO # {{po.ponumber}}</h2>
+         <a href="/poitemscppedit/{{po.ponumber}}" class="btn btn-dark"> Edit</a>
+
       </div>
 
       <div class="col">
@@ -67,6 +69,11 @@
                   <button class="btn btn-success" type="submit">Receiving Copy</button> 
                   </div>
                </form>
+               <form action="mailto:{{vendor.vendormemail}}?subject=New PO#{{po.ponumber}}%20from Program - Confirmaiton Required!&body=Dear%20{{vendor.vendorcontact}}%0D%0A %0D%0A %0D%0A Please confirm receipt of PO.%0D%0A %0D%0A %0D%0A Best Regards,%0D%0A {{buyer.name}} " method="POST"> 
+                  <div class="form-group">
+                  <button class="btn btn-danger" type="submit">Send PO Email</button>
+                  </div>
+               </form>
             </div>
          </div>
       </div>
@@ -83,9 +90,9 @@
       </div>
       <!--CHANGE PURCHASER AFTER CREATING PURCHASER TABLE-->
       <div class="col">
-         <b>Purchaser </b> {{purchaser.purchasername}}<br>
-         Phone: {{purchaser.purchaserphone}} <br>
-         Email: {{purchaser.purchaseremail}}
+         <b>Purchaser </b> {{po.pobuyer}}<br>
+         Phone: {{buyer.phone}} <br>
+         Email: {{buyer.email}}
       </div>
 
       <div class="col">
@@ -103,23 +110,31 @@
       </div>
 
       <div class="col">
-         <b>On Site Contact(s):</b>
+
+            <div class="form-group">
+               <b>On-Site Contact(s):</b><br>
+               <b>{{onsitecontact1[0].purchasername}}<br></b>
+               {{onsitecontact1[0].purchaserphone}}<br>
+               {{onsitecontact1[0].purchaseremail}}<br>
+               <b>{{onsitecontact1[1].purchasername}}<br></b>
+               {{onsitecontact1[1].purchaserphone}}<br>
+               {{onsitecontact1[1].purchaseremail}}<br>
+            </div>
       </div>
+
+      <div class="col">
+         <br><br><br><br><br><br>
+         <b>Tax Rate: {{po.potaxrate}} %</b><br>
+         <b>PO Subtotal: $ {{subtotal}} </b>
+         <br>
+         <br>
+      </div>
+
+
    </div>
 
-      <div id="thetotals" style="float:right;">
-         <span id="taxrate"><b>Tax Rate: {{po.potaxrate}} %</b></span><br>
-            <b>Subtotal: $</b> {{subtotal}}
-         <br><br>
-      </div>
 
-      <div class="form-group">
-         <b>Creation Date:</b> {{today}}
-      </div>
 
-      <div class="form-group">
-         <b>Job Type:</b> {{po.pojobtype}}          
-      </div>       
 
 
 
@@ -131,7 +146,8 @@
          <table id="vendoritems" class="table table-hover table-dark mb-0 table-sm" cellspacing="0" cellpadding="0" width="100%" >
             <colgroup>
                <col span="1" style="width: 7%;">
-               <col span="1" style="width: 79%;">
+               <col span="1" style="width: 72%;">
+               <col span="1" style="width: 7%;">
                <col span="1" style="width: 7%;">
                <col span="1" style="width: 7%;">
             </colgroup>
@@ -139,6 +155,7 @@
                <tr>
                   <th>QTY</th>
                   <th>Item Description</th>
+                  <th>Part No./Tag No.</th>
                   <th>Item Cost</th>
                   <th>UOM</th>
                </tr>
@@ -147,10 +164,10 @@
                <tr>
                   <td><input type="number" class="form-control" id="poitemquantity" name="poitemquantity" form="manual" autofocus></td>
                   <td><input type="text" class="form-control" name="poitemdescription" form="manual" placeholder="Item Description"></td>
+                  <td><input type="text" class="form-control" name="itempart" form="manual"></td>
                   <td><input type="number" class="form-control" name="itemprice" form="manual"></td>
                   <td><input type="text" class="form-control" name="itemunit" form="manual" placeholder="lb. case ft." onchange="this.form.submit()" autocomplete="off"></td>
                   
-                  <input type="hidden" class="form-control" name="itempart" form="manual" placeholder="Part Number" value="###">
                   <input type="hidden" class="form-control" name="itemcostcode" form="manual" placeholder="###" value="###">
                   <input type="hidden"  name="ponumber" value="{{po.ponumber}}" form="manual">
                   <input type="hidden"  name="poitemskid" value="{{po.poskid}}" form="manual">
@@ -173,7 +190,6 @@
                <th><a href="#top">↑</a></th>
                <th>QTY</th>
                <th>ITEM DESCRIPTION</th>
-               <th>PART No./Tag No.</th>
                <th>COST CODE</th>
                <th>ITEM COST</th>
                <th>UOM</th>
@@ -200,7 +216,7 @@
                      <input type="hidden" name="poitemtag" value="{{row.poitemtag}}">
                   </form></td>
                   <td><form action="{{url_for('poitemeditcell')}}" method="POST" enctype="multipart/form-data">
-                     <input type="text" class="form-control" name="poitemdescription" value="{{row.poitemdescription}}" onchange="this.form.submit()" autocomplete="off" size="115">
+                     <input type="text" class="form-control" name="poitemdescription" value="{{row.poitemdescription}} {{row.poitemtag}}" onchange="this.form.submit()" autocomplete="off" size="115">
                      <input type="hidden" name="id" value="{{row.id}}">
                      <input type="hidden" name="poitemquantity" value="{{row.poitemquantity}}">
                      <input type="hidden" name="poitemprice" value="{{row.poitemprice}}">
@@ -208,20 +224,6 @@
                      <input type="hidden" name="poitemtotalprice" value="{{row.poitemtotalprice}}">
                      <input type="hidden" name="poitemcostcode" value="{{row.poitemcostcode}}">
                      <input type="hidden" name="poitemtag" value="{{row.poitemtag}}">
-                  </form></td>
-                  <td><form action="{{url_for('poitemeditcell')}}" method="POST" enctype="multipart/form-data">
-                     {%if row.poitemtag == None %}
-                        <input type="text" class="form-control" name="poitemtag" value="" onchange="this.form.submit()" autocomplete="off" size="19">
-                     {%else%}
-                        <input type="text" class="form-control" name="poitemtag" value="{{row.poitemtag}}" onchange="this.form.submit()" autocomplete="off" size="19">
-                     {%endif%}
-                     <input type="hidden" name="id" value="{{row.id}}">
-                     <input type="hidden" name="poitemquantity" value="{{row.poitemquantity}}">
-                     <input type="hidden" name="poitemprice" value="{{row.poitemprice}}">
-                     <input type="hidden" name="poitemunit" value="{{row.poitemunit}}">
-                     <input type="hidden" name="poitemtotalprice" value="{{row.poitemtotalprice}}">
-                     <input type="hidden" name="poitemcostcode" value="{{row.poitemcostcode}}">
-                     <input type="hidden" name="poitemdescription" value="{{row.poitemdescription}}">
                   </form></td>
                   <td><form action="{{url_for('poitemeditcell')}}" method="POST" enctype="multipart/form-data">
                      <input type="text" class="form-control" name="poitemcostcode" value="{{row.poitemcostcode}}" onchange="this.form.submit()" autocomplete="off" size="3">
@@ -291,9 +293,6 @@
                   <input type="text" class="form-control" name="poitemdescription" onchange="this.form.submit()"  autocomplete="off" size="115">
                </form></td> 
                <td><form action="{{url_for('poitemscpinsertcell')}}" method="POST" enctype="multipart/form-data">
-                  <input type="text" class="form-control" name="poitemtag" onchange="this.form.submit()"  autocomplete="off" size="19">
-               </form></td> 
-               <td><form action="{{url_for('poitemscpinsertcell')}}" method="POST" enctype="multipart/form-data">
                   <input type="text" class="form-control" name="poitemcostcode" onchange="this.form.submit()"  autocomplete="off" size="3">
                </form></td>
                <td><form action="{{url_for('poitemscpinsertcell')}}" method="POST" enctype="multipart/form-data">
@@ -343,7 +342,6 @@
          "ordering":false,
          "info":false,
           columns: [
-          {orderable: false, searchable: false},
           {orderable: false, searchable: false},
           {orderable: false, searchable: false},
           {orderable: false, searchable: false},

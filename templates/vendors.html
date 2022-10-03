@@ -22,7 +22,6 @@
                <th>Contact</th>
                <th>Phone</th>
                <th>Email</th>
-               <th>Tax Rate</th>
                <th></th>
                <th>Mark Inactive</th>
             </tr>
@@ -40,7 +39,6 @@
                <td>{{row.vendorcontact}}</td>
                <td>{{row.vendorphone}}</td>
                <td>{{row.vendormemail}}</td>
-               <td>{{row.vendortaxrate}} %</td>
                <td><a href="/updatevendor/{{row.id}}" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#modaledit{{row.id}}">Edit</a></td>
                <td><a href="/deletevendor/{{row.id}}" class="btn btn-danger btn-xs" onclick="return confirm('Are You Sure To Mark As Inactive ?')">-</a></td>               
          </tr>
@@ -115,6 +113,11 @@
                                     </div>
                                   </div>
                    
+                                 <div class="form-group">
+                                    <label>Notes:</label>
+                                    <input type="text" class="form-control" name="vendornotes" value="{{row.vendornotes}}">
+                                 </div>
+
                                  <div class="form-group">
                                     <button class="btn btn-primary" type="submit">Update</button>
                                  </div>               
@@ -202,6 +205,11 @@
                                       <span class="input-group-text" id="basic-addon2">%</span>
                                     </div>
                                   </div>
+
+                                 <div class="form-group">
+                                    <label>Notes:</label>
+                                    <input type="text" class="form-control" name="vendornotes">
+                                 </div>
                        
                                  <div class="form-group">              
                                     <button class="btn btn-primary" type="submit">Add Vendor</button>                               
@@ -231,7 +239,6 @@
       $('#vendorstable').DataTable({
          "order": [],
          columns: [
-         {orderable: false},
          {orderable: false},
          {orderable: false},
          {orderable: false},

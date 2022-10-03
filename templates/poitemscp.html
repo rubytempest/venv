@@ -9,9 +9,12 @@
       <b>Find PO:</b> <input type="text" name="poredirect">
    </form>
    
-   <b>Revise PO:</b> <input type="text" name="poredirect"><br>
-   <b>Rev No:</b> <input type="text" name="poredirect" size="3"><br>
-   <b>Rev Notes:</b> <textarea style="width: 100%; max-width: 100%;"></textarea>
+   <form class="form-group" action="{{url_for('porevision')}}" method="POST">
+      <b>Revise PO:</b> <input type="text" name="revisionspo"><br>
+      <b>Rev No:</b> <input type="text" name="revisionnumber" size="3"><br>
+      <b>Rev Notes:</b> <textarea name="revisionnotes" style="width: 100%; max-width: 100%; color:red;" onchange="this.form.submit()"></textarea>
+   </form>
+
 </div>
 
    <div class="row" style="width:50% ;">
@@ -26,6 +29,8 @@
             <input type="hidden" name="povendor" value="Airgas USA LLC">
             <input type="hidden" name="ponumber" value="000">
             <input type="hidden" name="pobuyer" value="name">
+            <input type="hidden" name="pospecialnotes" value="">
+            <input type="hidden" name="poshippingnotes" value="">
 
             </div>
          </form>
@@ -69,18 +74,19 @@
 
                <div class="row" style="width:50%">
                   <div class="col-md-auto">
-                     <b>Acct. Code:</b>
+                     <b>Acct. Code: {{formpo.poaccountcode(size=1)}}</b>
                   </div>
                   <div class="col-md-auto"></div>
                   <div class="col-md-auto">
                      <b>Standard Notes:</b>
+                     [PENDING]
                   </div>
                </div>
 
                <div class="row" style="width:42%">
                   <div class="col">
                      <b>Special Notes:</b><br>
-                        <textarea style="width: 100%; max-width: 100%;"></textarea>
+                        <textarea name="pospecialnotes" style="width: 100%; max-width: 100%;" onchange="this.form.submit()">{{specialnotes}}</textarea>
                   </div>
                </div>
 
@@ -97,13 +103,13 @@
                      </textarea>
 
                   </div>
-            </form>
+
       <div class="col">
+         
          <div class="form-group">
             <b>Shipping/Receiving Notes:</b>
          </div>
-         <textarea rows="4" style="width: 100%; max-width: 100%;">
-         </textarea>
+         <textarea name="poshippingnotes" rows="4" style="width: 100%; max-width: 100%;" onchange="this.form.submit()">{{shippingnotes}}</textarea>
 
          <div class="form-group">
             <b>FOB</b>                 
@@ -122,13 +128,13 @@
          </div>
    </div>
 
-
-
-
+</form>
 
 
                   <form action="{{url_for('poitemscpposave')}}" method="POST" enctype="multipart/form-data">
                      
+                     <input type="hidden" name="pospecialnotes" value="{{specialnotes}}">
+                     <input type="hidden" name="poshippingnotes" value="{{shippingnotes}}">
                      <input type="hidden" name="pocreated" value="{{pocreated}}">
                      <input type="hidden" name="ponumber" value={{nextpo}}>
                      <input type="hidden" name="poshipto" value="{{shipto.locationname}}">
@@ -144,6 +150,8 @@
 
                   <form action="{{url_for('poitemscppreserve')}}" method="POST" enctype="multipart/form-data">
 
+                     <input type="hidden" name="pospecialnotes" value="{{specialnotes}}">
+                     <input type="hidden" name="poshippingnotes" value="{{shippingnotes}}">
                      <input type="hidden" name="pocreated" value="{{pocreated}}">
                      <input type="hidden" name="ponumber" value={{nextpo}}>
                      <input type="hidden" name="poshipto" value="{{shipto.locationname}}">

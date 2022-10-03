@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}PO SYSTEM{% endblock %}
+
+{% block content %}
+
+<br>
+<div style="float:right">
+   <form class="form-group" action="{{url_for('poitemsredirect')}}" method="POST">
+      <b>Find PO:</b> <input type="text" name="poredirect">
+   </form>
+   
+   <b>Revise PO:</b> <input type="text" name="poredirect"><br>
+   <b>Rev No:</b> <input type="text" name="poredirect" size="3"><br>
+   <b>Rev Notes:</b> <textarea style="width: 100%; max-width: 100%; color:red;"></textarea>
+</div>
+
+   <div class="row" style="width:50% ;">
+
+      <div class="col-md-auto">
+            <div class="form-group">
+            <!--SUBMIT ON WTFORM SELECT CHANGE-->
+            <b>JOB # </b>           
+                <input type="text" value="{{po.pojob}}" disabled>
+            </div>
+
+      </div>
+      <div class="col-md-auto">
+         <form action="{{url_for('poitemscppupdate')}}" method="POST" class="form-inline">   
+
+               <b>PO # </b><input type="text" name="ponumber" value={{po.ponumber}} disabled> 
+                  </div>
+                  <div class="col-md-auto">
+                        <b>Creation Date: </b><input type="date" name="pocreated" value="{{po.pocreated}}">
+                  </div>
+                  
+               </div>
+
+                            <div class="row" style="width:50%">
+                                <div class="col-md-auto">
+                                    <b>Vendor: </b>
+                                    {{formpo.povendor(size=1)}}
+                                    {% for error in formpo.povendor.errors %}
+                                    <span style="color:red;">
+                                    {{error}}
+                                    </span>
+                                    {% endfor %}
+                                </div>
+                                <div class="col-md-auto"></div>
+                                <div class="col-md-auto">
+                                    <b>Required Date:</b>
+                                    <input type="date" value="{{required}}" >
+                                </div>
+                            </div>
+
+                            <div class="row" style="width:50%">
+                                <div class="col-md-auto">
+                                    <b>Purchaser:</b> {{formpo.pobuyer(size=1)}}
+                                </div>
+                                <div class="col-md-auto"></div>
+                                <div class="col-md-auto">
+                                    <b>E-mail:</b> {{current_user.email}}
+                                </div>
+                            </div>
+
+                            <div class="row" style="width:50%">
+                                <div class="col-md-auto">
+                                    <b>Acct. Code: {{formpo.poaccountcode(size=1)}}</b>
+                                </div>
+                                <div class="col-md-auto"></div>
+                                <div class="col-md-auto">
+                                    <b>Standard Notes:</b>
+                                    [PENDING]
+                                </div>
+                            </div>
+
+                            <div class="row" style="width:42%">
+                                <div class="col">
+                                    <b>Special Notes:</b><br>
+                                    <textarea name="pospecialnotes" style="width: 100%; max-width: 100%;">{{po.pospecialnotes}}</textarea>
+                                </div>
+                            </div>
+
+                            <div class="row" style="width:65%">
+                                <div class="col">
+                                    <div class="form-group">
+                                    <b>Ship to:</b> 
+                                    {%if hide != 1%}
+                                    {{formpo.poshipto(size=1)}}
+                                    {%endif%}
+                                    </div>
+                                    <input type="hidden" name="bomjobnumber" value={{pojob}}>
+                                    <textarea id="location" name="location" rows="4" style="width: 100%; max-width: 100%;" disabled>{{shipto.locationname}}&#13;&#10;{{shipto.locationaddress}}&#13;&#10;{{shipto.locationcity}}, {{shipto.locationstate}} {{shipto.locationzipcode}}
+                                    </textarea>
+
+                                </div>
+
+                    <div class="col">
+                        <div class="form-group">
+                        <b>Shipping/Receiving Notes:</b>
+                        </div>
+                        <textarea name="poshippingnotes" rows="4" style="width: 100%; max-width: 100%;">{{po.poshippingnotes}}</textarea>
+
+                        <div class="form-group">
+                        <b>FOB</b>                 
+                        <input type="text" name="fob" value="Prepaid & Allow"> 
+                        </div>   
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                        <b>On-Site Contact(s):</b><br>
+                        <b>{{onsitecontact1[0].purchasername}}<br></b>
+                        {{onsitecontact1[0].purchaserphone}}<br>
+                        {{onsitecontact1[0].purchaseremail}}<br>
+                        <b>{{onsitecontact1[1].purchasername}}<br></b>
+                        {{onsitecontact1[1].purchaserphone}}<br>
+                        {{onsitecontact1[1].purchaseremail}}<br>
+                        </div>
+                    </div>
+                     
+                     <input type="hidden" name="id" value="{{po.id}}">
+
+                     <div class="form-group" >
+                        <button class="btn btn-primary" type="submit">UPDATE PO</button>
+                     </div>
+
+        </form>
+
+    </div>
+
+
+   {% endblock %}
+
