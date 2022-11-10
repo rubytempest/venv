@@ -14,22 +14,43 @@
          <div class="row" style="float:right;">
 
             <div class="col col-md">
-               <form action="{{url_for('importpoitemscpp')}}" method="POST" enctype="multipart/form-data"> 
-                  <div class="form-group" style="float:right;">
-                  <input type="hidden"  name="ponumber" value="{{po.ponumber}}">
-                  <input type="hidden" name="povendor" value="{{po.povendor}}">
-                  <input type="hidden" name="pocreated" value="{{po.pocreated}}">
-                  <input type="hidden" name="pojobtype" value="{{po.pojobtype}}">
-                  <input type="hidden" name="pojobtypenum" value="{{po.pojobtypenum}}">
-                  {{formexcel.hidden_tag()}}
-                  {{formexcel.csrf_token}}
-                  {{formexcel.itemfile}}
-                  <button class="btn btn-warning" type="submit">IMPORT EXCEL FILE</button>
-                  </div>
-               </form>
+               {%if po.postatus == "Approved"%}
+                  <form action="{{url_for('importpoitemscpp')}}" method="POST" enctype="multipart/form-data"> 
+                     <div class="form-group" style="float:right;">
+                     <input type="hidden"  name="ponumber" value="{{po.ponumber}}">
+                     <input type="hidden" name="povendor" value="{{po.povendor}}">
+                     <input type="hidden" name="pocreated" value="{{po.pocreated}}">
+                     <input type="hidden" name="pojobtype" value="{{po.pojobtype}}">
+                     <input type="hidden" name="pojobtypenum" value="{{po.pojobtypenum}}">
+                     {{formexcel.hidden_tag()}}
+                     {{formexcel.csrf_token}}
+                     {{formexcel.itemfile}}
+                     <button class="btn btn-warning" type="submit">IMPORT EXCEL FILE</button>
+                     </div>
+                  </form>
+               {%else%}
+                  <form action="{{url_for('flatfilepoexport')}}" method="POST"> 
+                     <div class="form-group">
+                        <input type="hidden" value="{{po.ponumber}}"  name="flatfileponumber" id="flatfileponumber">
+                        <input type="hidden" value="{{po.potaxrate}}"  name="potaxrate" id="potaxrate">
+                        <button class= "btn btn-warning" type="submit">Flat File</button>
+                     </div>
+                  </form>
+               {%endif%}
             </div>
+
             <div class="col col-md-auto">
-               <td><a href="/deletepo/{{po.id}}" class="btn btn-danger" onclick="return confirm('Are You Sure To Delete ?')">Discard PO</a></td>
+               {%if po.postatus == "Approved"%}
+                  <td><a href="/deletepo/{{po.id}}" class="btn btn-danger" onclick="return confirm('Are You Sure To Delete ?')">Discard PO</a></td>
+               {%else%}
+                  <form action="{{url_for('poreceiving')}}" method="POST"> 
+                     <div class="form-group">
+                     <input type="hidden"  name="id" value="{{po.id}}">
+                     <input type="hidden"  name="sendto" value="receiving">
+                     <button class="btn btn-danger" type="submit">Rec'ing PO</button> 
+                     </div>
+                  </form>
+               {%endif%}
             </div>
 
          <!--
@@ -55,25 +76,22 @@
             </div>
          
             <div class="col col-md-auto">
-               <form action="{{url_for('flatfilepoexport')}}" method="POST"> 
-                  <div class="form-group">
-                     <input type="hidden" value="{{po.ponumber}}"  name="flatfileponumber" id="flatfileponumber">
-                     <input type="hidden" value="{{po.potaxrate}}"  name="potaxrate" id="potaxrate">
-                     <button class= "btn btn-success" type="submit">Generate FlatFile</button>
-                  </div>
-               </form>
-               <form action="{{url_for('poreceiving')}}" method="POST"> 
-                  <div class="form-group">
-                  <input type="hidden"  name="id" value="{{po.id}}">
-                  <input type="hidden"  name="sendto" value="receiving">
-                  <button class="btn btn-success" type="submit">Receiving Copy</button> 
-                  </div>
-               </form>
-               <form action="mailto:{{vendor.vendormemail}}?subject=New PO#{{po.ponumber}}%20from Program - Confirmaiton Required!&body=Dear%20{{vendor.vendorcontact}}%0D%0A %0D%0A %0D%0A Please confirm receipt of PO.%0D%0A %0D%0A %0D%0A Best Regards,%0D%0A {{buyer.name}} " method="POST"> 
-                  <div class="form-group">
-                  <button class="btn btn-danger" type="submit">Send PO Email</button>
-                  </div>
-               </form>
+
+               {%if po.postatus == "Approved"%}
+                  <form action="{{url_for('executepo')}}" method="POST"> 
+                     <div class="form-group">
+                        <input type="hidden" value="{{po.id}}"  name="id">
+                        <button class= "btn btn-success" type="submit">Execute PO</button>
+                     </div>
+                  </form>
+               {%else%}
+                  <form action="mailto:{{vendor.vendormemail}}?subject=New PO#{{po.ponumber}}%20from Program - Confirmaiton Required!&body=Dear%20{{vendor.vendorcontact}}%0D%0A %0D%0A %0D%0A Please confirm receipt of PO.%0D%0A %0D%0A %0D%0A Best Regards,%0D%0A {{buyer.name}} " method="POST"> 
+                     <div class="form-group">
+                     <button class="btn btn-success" type="submit">Submit Email</button>
+                     </div>
+                  </form>
+               {%endif%}
+
             </div>
          </div>
       </div>

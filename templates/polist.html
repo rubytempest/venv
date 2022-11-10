@@ -70,7 +70,7 @@
                      {%elif row.postatus == "In Progress" or row.postatus == "Rejected"%}
                         <td><a href="/poitemsv2/{{row.ponumber}}" class="btn btn-warning btn-xs">Edit PO</a></td>
                      {%elif row.postatus == "Ordered"%}
-                        <td><a href="/poitemsv2/{{row.ponumber}}" class="btn btn-warning btn-xs">View PO</a></td>
+                        <td><a href="/poitemscpp/{{row.ponumber}}" class="btn btn-warning btn-xs">View PO</a></td>
                      {%elif row.postatus == "REQUEST FOR QUOTE"%}
                         <td><a href="/bomitemsv2/{{row.ponumber}}" class="btn btn-warning btn-xs">View PO</a></td>
                      {%else%}

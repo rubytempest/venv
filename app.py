@@ -29,7 +29,6 @@ ALLOWED_EXTENSIONS = { 'xlsx', 'xls', 'csv', 'pdf'}
 app = Flask(__name__)
 
 
-
 #Config to save uploads folder
 app.config['UPLOAD FOLDER'] = UPLOAD_FOLDER
 
@@ -363,6 +362,8 @@ def index():
     name = current_user.username
     return redirect(url_for('poitemscp'))                   #HOMEPAGE
 
+
+
 ## START RECEIVING ROUTES ##
 #VIEW RECEIVING TABLE
 @app.route("/receiving", methods=["POST", "GET"])
@@ -378,7 +379,7 @@ def receiving():
 @login_required
 def recitemsv2(ponumber):
 
-    form = ReceivingForm()
+    form = ReceivingForm()    
     ponumber = ponumber                                       
     descending = POInfo.query.filter(POInfo.ponumber == ponumber)
     po = descending.first()
@@ -408,7 +409,7 @@ def insertallrecitemsv2():
  
         return redirect(url_for('recitemsv2', ponumber=ponumber))
 
-#INSERTSINGLERECITEMS V2
+#INSERTSINGLERECITEMS V2 INSERT SINGLE RECEIVING ITEMS QUANTITY
 @app.route("/insertsinglerecitemsv2", methods=["POST", "GET"])
 def insertsinglerecitemsv2():
     if request.method == 'POST':
@@ -961,17 +962,6 @@ def porevision():
         return redirect(url_for("poitemscp"))
 
 
-    #    onsitecontact1 = PurchasersInfo.query.filter(PurchasersInfo.purchaserjob == "").order_by(PurchasersInfo.id.asc()).all()
-    #    empty=[".",".","."]
-    #    onsitecontact1.append(empty)
-    #else:
-    #    onsitecontact1 = [[".",".","."],[".",".","."]]
-
-
-    #return render_template("poitemscp.html", onsitecontact1=onsitecontact1, hide=hide, form=form, formpo=formpo, nextpo=nextpo, vendor=vendor, shipto=shipto, buyer=buyer, today=today)
-
-
-
 ### VIEW POITEMSCP.HTML ###
 @app.route("/poitemscp", methods=["POST", "GET"])
 @login_required
@@ -988,8 +978,6 @@ def poitemscp():
         buyer = current_user.name
         specialnotes = ""
         shippingnotes = ""
-
-
 
         #Autofill PONUMBER
         lastpo = POInfo.query.order_by(POInfo.id.desc()).first()
@@ -1009,7 +997,7 @@ def poitemscp():
         else:
             onsitecontact1 = [[".",".","."],[".",".","."]]
 
-        formpo.povendor.choices = ['---']+[(povendor.vendorname) for povendor in VendorsInfo.query.all()]  #query to populate vendors box
+        formpo.povendor.choices = [(povendor.vendorname) for povendor in VendorsInfo.query.all()]  #query to populate vendors box
         formpo.poshipto.choices = [(poshipto.locationname) for poshipto in LocationInfo.query.all()]
         formpo.pobuyer.choices = [current_user.name] + [(pobuyer.purchasername) for pobuyer in PurchasersInfo.query.all()]
  
@@ -1379,6 +1367,15 @@ def poitemscpp(ponumber):
     formpo.povendor.choices = [(povendor.vendorname) for povendor in VendorsInfo.query.all()]  #query to populate vendors box
 
     return render_template("poitemscpp.html", onsitecontact1=onsitecontact1, formexcel=formexcel, purchaser=purchaser, subtotal=subtotal, form=form, formpo=formpo, poitems=poitems, vendor=vendor, shipto=shipto, buyer=buyer, today=today, po=po)
+
+#EXECUTE PO BUTTON CODE
+@app.route("/executepo", methods=["POST", "GET"])
+def executepo():
+    my_data = POInfo.query.get(request.form.get('id'))
+    my_data.postatus = "Ordered"
+    db.session.commit()
+ 
+    return redirect(url_for('poitemscpp', ponumber=my_data.ponumber))
 
 ### ADD POITEMSCPP ITEM SINGLE ###
 
@@ -2313,7 +2310,7 @@ def flatfilepoexport():
         formattaxrate = format(po.potaxrate, '.4f')                         #Add 4 decimal places to tax rate
         print(formattaxrate)
         for row in poitems:
-            data = [row.poitemvendor,row.poitemjobtype,row.poitemdate,row.poitempo,str(row.poitemjobtypenumber) + str(row.poitemcostcode), row.poitemdescription, row.poitemquantity, "$" + str(row.poitemprice), row.poitemunit, "$" + str(row.poitemtotalprice), str(formattaxrate) + "%", "", shipto.locationname + "-" + shipto.locationaddress + " " + shipto.locationcity + "," + shipto.locationstate + " " + shipto.locationzipcode]
+            data = [row.poitemvendor, row.poitemjobtype, row.poitemdate.strftime('%m/%d/%Y'),row.poitempo,str(row.poitemjobtypenumber) + str(row.poitemcostcode), row.poitemdescription, row.poitemquantity, "$" + str(row.poitemprice), row.poitemunit, "$" + str(row.poitemtotalprice), str(formattaxrate) + "%", "", shipto.locationname + "-" + shipto.locationaddress + " " + shipto.locationcity + "," + shipto.locationstate + " " + shipto.locationzipcode]
             writer.writerow(data)
     
     #Code to convert csv file to xlsx
@@ -2593,11 +2590,6 @@ def register():
         return redirect(url_for('Login'))
  
     return render_template('register.html', form=form)
-
-### BETA FEEDBACK.HTML ###
-@app.route('/feedback', methods = ['GET','POST'])
-def feedback():
-    return render_template("feedback.html")
 
 @app.errorhandler(404)
 def not_found(e):

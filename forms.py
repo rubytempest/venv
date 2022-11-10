@@ -30,7 +30,7 @@ class POForm(FlaskForm):
     poacccode = SelectField("Account Code", choices=[('Construction Equipment'),('Fuel'),('Repairs & Maintenance'),('Dyed Diesel Fuel'),('1.41.97-LowIncome')])
     pocreated = DateField("Creation Date", default=datetime.today, validators=[DataRequired()])  #date field default today
     pobuyer = SelectField('Buyer', choices=[])
-    povendor = SelectField('Vendor', choices=[], validators=[DataRequired()])  #choices are left empty if intended to be filled with database information
+    povendor = SelectField(u'-- Select a Vendor --', choices=[], validators=[InputRequired()])  #choices are left empty if intended to be filled with database information
     pobillto = SelectField('Bill To', choices=[])
     poshipto = SelectField('Ship To', choices=[])
     popayment= SelectField('Payment Terms', choices=[('NET 15'),('NET 30'),('NET 60')], default='NET 30')
