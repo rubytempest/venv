@@ -369,9 +369,15 @@ def index():
 @app.route("/receiving", methods=["POST", "GET"])
 @login_required
 def receiving():
-    all_data = POInfo.query.order_by(POInfo.id.desc()).all()                        #List of PO retrieved and organize = newest first		
-
-    return render_template("receiving.html", pos = all_data)
+    #Autofill PONUMBER
+    lastpo = POInfo.query.order_by(POInfo.id.desc()).first()
+    format = lastpo.ponumber.replace("-","")
+    nextpo = int(format) + 1
+    nextpo = str(nextpo)
+    nextpo = nextpo[:4] + '-' + nextpo[4:]
+    all_data = POInfo.query.order_by(POInfo.id.desc()).all()                        #List of PO retrieved and organize = newest first
+    buyer = current_user
+    return render_template("receiving.html", pos = all_data, buyer=buyer, nextpo=nextpo)
 
 
 #VIEW RECITEMSV2.HTML
@@ -379,7 +385,7 @@ def receiving():
 @login_required
 def recitemsv2(ponumber):
 
-    form = ReceivingForm()    
+    form = ReceivingForm()
     ponumber = ponumber                                       
     descending = POInfo.query.filter(POInfo.ponumber == ponumber)
     po = descending.first()
@@ -1877,7 +1883,7 @@ def bomrequest():
 
     #CONVERT BOM ITEMS INTO PO ITEMS
     for each in unique:
-        poitempo = str(each.bomjobnumber) + "0-0001"
+        poitempo = str(each.bomjobnumber) + "987" + str(len(material))
         poitemdescription = each.bomdescription
         print(poitemdescription)
         poitemskid = None
@@ -1889,7 +1895,7 @@ def bomrequest():
         poitemtracking = None
         poitemtracking = None
         poitemnotes = None
-        poitemvendor = None
+        poitemvendor = material
         poitemprice = 0
         poitemdate = date.today()
         poitemunit = each.bomunit
