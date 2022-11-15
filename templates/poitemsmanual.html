@@ -1,13 +1,6 @@
 {% extends "base.html" %}
 {% block title %}PO #{{po.ponumber}}{% endblock %}
 
-<script type="text/javascript">
-function FocusOnInput()
-{
-   document.getElementById("poitemquantity").focus()
-}
-</script>
-
 {% block content %}
 
 <!--VENDOR AND SHIPPING INFORMATION-->
@@ -73,10 +66,10 @@ function FocusOnInput()
                </thead>
 
                <tr>
-                  <td><input type="text" class="form-control" id="poitemquantity" name="poitemquantity" form="manual" autofocus></td>
+                  <td><input type="text" class="form-control" name="poitemquantity" form="manual"></td>
                   <td><input type="text" class="form-control" name="poitemdescription" form="manual" placeholder="Item Description"></td>
                   <td><input type="text" class="form-control" name="itemprice" form="manual"></td>
-                  <td><input type="text" class="form-control" name="itemunit" form="manual" placeholder="lb. case ft." onchange="this.form.submit()" autocomplete="off"></td>
+                  <td><input type="text" class="form-control" name="itemunit" form="manual" placeholder="lb. case ft."></td>
                   
                   <input type="hidden" class="form-control" name="itempart" form="manual" placeholder="Part Number" value="###">
 
@@ -89,6 +82,7 @@ function FocusOnInput()
                         <input type="hidden"  name="pojobtype" value="{{po.pojobtype}}" form="manual">
                         <input type="hidden"  name="pojobtypenum" value="{{po.pojobtypenum}}" form="manual">
                         <input type="hidden"  name="itemvendor" value="{{po.povendor}}" form="manual">
+                        <button type="submit" class="btn btn-primary mb-2" form="manual">+</button>
                   </td>
                </tr>
 
@@ -225,3 +219,43 @@ function FocusOnInput()
 {% endblock %}
 
 
+<!--Script for not reloading page-->
+<script type="text/javascript">
+   $(document).on('submit','#todo-form',function(e)
+                  {
+     console.log('hello');
+     e.preventDefault();
+     $.ajax({
+       type:'POST',
+       url:'/',
+       data:{
+         todo:$("#todo").val()
+       },
+       success:function()
+       {
+         alert('saved');
+       }
+     })
+   });
+ </script>
+
+
+<!--Script for Databases.js-->
+{% block scripts %}
+<script>
+    $(document).ready(function () {
+      $('#vendoritems').DataTable({
+         "order": [],
+         "scrollX": false,
+         "paging": false,
+          columns: [
+          {orderable: false},
+          {orderable: false},
+          {orderable: false, searchable: false},
+          {orderable: false, searchable: false},
+          {orderable: false, searchable: false},
+            ],
+      });
+    });
+  </script>
+{% endblock %}

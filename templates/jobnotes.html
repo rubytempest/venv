@@ -33,13 +33,13 @@
             <tr>
                 <td><form class="form-group" action="{{url_for('addjobnotes')}}" method="POST">          
                     <input type="hidden" name="jobnumber" value={{jobnumber}}>
-                    <div class="form-group">                  
+                    <div class="form-group">
                         {%if jobnumber==""%}                  
                             <input type="text" name="jobnotes" class="form-control" autocomplete="off" disabled>
                         {%else%}
                             <input type="text" name="jobnotes" class="form-control" autocomplete="off" autofocus>
 
-                        {%endif%}                    
+                        {%endif%}
                     </div>
                 </form></td>
                 <td></td>
@@ -51,10 +51,11 @@
 
         <form class="form-group" action="{{url_for('addattachment')}}" method="POST" enctype="multipart/form-data">          
             <input type="hidden" name="jobnumber" value={{jobnumber}}>
-            <button class="btn btn-warning" type="submit">ADD ATTACHMENT FILE</button>
             {{form.hidden_tag()}}
             {{form.csrf_token}}
-            {{form.locationattachment}}         
+            {{form.locationattachment}} 
+            <button class="btn btn-warning" type="submit">ADD ATTACHMENT FILE</button>
+         
         </form>
 
         <table id="jobattachments" class="table table-hover table-dark mb-0 table-sm" cellspacing="0" cellpadding="0" width="100%" >

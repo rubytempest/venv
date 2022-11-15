@@ -38,7 +38,7 @@
                         </div>
                         <div class="col">
                     <form action="{{url_for('bomrequest')}}" method="POST" autocomplete="off"> 
-                        <input type="hidden" value="FLANGE"  name="material" id="material">
+                        <input type="hidden" value="STEEL"  name="material" id="material">
                         <input type="hidden" name="bomjobnumber" id="bomjobnumber" value="{{pojob}}">
                         <button class= "btn btn-primary"type="submit">STEEL</button>
                     </form>
@@ -99,10 +99,10 @@
                 </thead>
                 {% for row in bom %}
                     {% if row.bomstatus == "RFQ" %}
-                        <tr class="table-warning">
+                        <tr></tr>
                     {% else %}
                         <tr>
-                    {%endif%}
+                    
                     <td>{{row.bomlinenumber}}</td>
                     <td>{{row.bomsize}}</td>
                     <td style="text-align:center;">{{row.bomquantity}}</td>
@@ -110,7 +110,8 @@
                     <td>{{row.bomtag}}</td>
                     <td>{{row.bomunit}}</td>
                     <td>{{row.bomstatus}}</td>
-                 </tr>      
+                 </tr>  
+                 {%endif%}    
                 {% endfor %}
                                                        
             </table>               
@@ -188,7 +189,7 @@ $(document).ready( function () {
           null,
           {orderable: false, searchable: false},
 		  {orderable: false, searchable: false},
-          {orderable: false, searchable: true, visible:false}],
+          {orderable: false, searchable: true}],
       });
   
  $('input:checkbox').on('change', function () {

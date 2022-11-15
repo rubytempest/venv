@@ -234,8 +234,11 @@
                      <input type="hidden" name="poitemtag" value="{{row.poitemtag}}">
                   </form></td>
                   <td><form action="{{url_for('poitemeditcell')}}" method="POST" enctype="multipart/form-data">
-                     <input type="text" class="form-control" name="poitemdescription" value="{{row.poitemdescription}} {{row.poitemtag}}" onchange="this.form.submit()" autocomplete="off" size="115">
-                     <input type="hidden" name="id" value="{{row.id}}">
+                     {% if row.poitemtag == "" %}
+                        <input type="text" class="form-control" name="poitemdescription" value="{{row.poitemdescription}}" onchange="this.form.submit()" autocomplete="off" size="115">
+                     {% else %}
+                        <input type="text" class="form-control" name="poitemdescription" value="{{row.poitemdescription}} - {{row.poitemtag}}" onchange="this.form.submit()" autocomplete="off" size="115">
+                     {% endif %}                     <input type="hidden" name="id" value="{{row.id}}">
                      <input type="hidden" name="poitemquantity" value="{{row.poitemquantity}}">
                      <input type="hidden" name="poitemprice" value="{{row.poitemprice}}">
                      <input type="hidden" name="poitemunit" value="{{row.poitemunit}}">
