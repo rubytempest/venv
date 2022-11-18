@@ -5,7 +5,7 @@ from werkzeug.security import check_password_hash, generate_password_hash       
 from flask_login import LoginManager, UserMixin                                 #imports required for user login
 from flask_login import login_user, logout_user, current_user, login_required   #imports required for user login
 import win32com.client                                                          #imports required to send emails
-from datetime import date
+from datetime import date, timedelta
 import pandas as pd                                                             #imports required to manipulate excel files
 import xlrd
 import pdfkit
@@ -2527,8 +2527,10 @@ def isti_po_format1(ponumber):
     total = round(total, 2)
 
     podate = po.pocreated.strftime('%m-%d-%Y')
+    due = po.pocreated + timedelta(days=7)
+    duedate = due.strftime('%m-%d-%Y')
 
-    return render_template("isti_po_format1.html" , poitems = all_data, po=po, vendor=vendor, shipto=shipto, buyer=buyer, subtotal=subtotal, taxed=taxed, total=total, notes=notes, podate=podate)
+    return render_template("isti_po_format1.html" , duedate=duedate, poitems = all_data, po=po, vendor=vendor, shipto=shipto, buyer=buyer, subtotal=subtotal, taxed=taxed, total=total, notes=notes, podate=podate)
 
 ### GENERATING RECEIVING PDF COPY OF PO ####
 @app.route('/isti_po_format_priceless/<ponumber>')

@@ -101,7 +101,7 @@
     <td style="width: 81px;" colspan="1" bgcolor="lightgray"><strong>Taxable</strong></td>
     <td style="width: 81px; text-align: center;" colspan="1" bgcolor="yellow"><strong>Yes</strong></td>
     <td style="width: 81px;" bgcolor="lightgray">&nbsp;Due</td>
-    <td style="width: 120px;" colspan="1" bgcolor="yellow" >&nbsp;##/##/####</td>
+    <td style="width: 120px;" colspan="1" bgcolor="yellow" >&nbsp;{{duedate}}</td>
     <td style="width: 120px;" bgcolor="lightgray">&nbsp;Terms</td>
     <td style="width: 120px;" >&nbsp;{{vendor.vendorpaymentterm}}</td>
     <td style="width: 219px;" bgcolor="lightgray"><strong>E-Mail Address:</strong></td>
@@ -109,7 +109,11 @@
     </tr>
 
     <tr>
-        <td style="color:red; text-align: center;" colspan="12">Attention Vendor please see important notes below:</td>
+        <td style="color:red; text-align: center;" colspan="12">Attention Vendor please see important notes below:<br>
+        {{po.pospecialnotes}} <br>
+        {{po.poshippingnotes}}
+        </td>
+
     </tr>
 
     <tr>
@@ -419,7 +423,7 @@
     <tr>
     <td style="width: 137px; text-align: center;" colspan="2"><strong>{{po.potaxrate}} %</strong></td>
     <td style="width: 2050.23px;" colspan="5">&nbsp;</td>
-    <td style="width: 212px;" colspan="2" ><strong>{{po.potaxrate}} Tax</strong></td>
+    <td style="width: 212px;" colspan="2" ><strong>Tax</strong></td>
     <td style="width: 254px;" colspan="2"><strong>&nbsp;$&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; {{taxed}}</strong></td>
     </tr>
     <tr>
