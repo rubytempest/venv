@@ -1055,9 +1055,9 @@ def poitemscp():
             nextpo= ponumber
 
         #On Site Contacts Information
-        onsitecontact1exists = db.session.query(db.exists().where(PurchasersInfo.purchaserjob == jobnumber)).scalar()
+        onsitecontact1exists = db.session.query(db.exists().where(PurchasersInfo.purchaserjob == shipto.locationjobnumber)).scalar()
         if onsitecontact1exists:
-            onsitecontact1 = PurchasersInfo.query.filter(PurchasersInfo.purchaserjob == jobnumber).order_by(PurchasersInfo.id.asc()).all()
+            onsitecontact1 = PurchasersInfo.query.filter(PurchasersInfo.purchaserjob == shipto.locationjobnumber).order_by(PurchasersInfo.id.asc()).all()
             empty=[".",".","."]
             onsitecontact1.append(empty)
         else:
@@ -1357,12 +1357,8 @@ def poitemscpp(ponumber):
 
     purchaser = PurchasersInfo.query.filter(PurchasersInfo.purchasername == po.pobuyer).first()
 
-        #On Site Contacts Information
-    onsitecontact1exists = db.session.query(db.exists().where(PurchasersInfo.purchaserjob == "")).scalar()
-    if onsitecontact1exists:
-        onsitecontact1 = PurchasersInfo.query.filter(PurchasersInfo.purchaserjob == "").order_by(PurchasersInfo.id.asc()).all()
-        empty=[".",".","."]
-        onsitecontact1.append(empty)
+
+
     else:
         onsitecontact1 = [[".",".","."],[".",".","."]]
 
