@@ -26,7 +26,7 @@
             <b>JOB # </b>           
             {{form.bomjobnumber(**{"onchange":"this.form.submit()"})}}
             <input type="hidden" name="poshipto" value="-">
-            <input type="hidden" name="povendor" value="Airgas USA LLC">
+            <input type="hidden" name="povendor" value="Broken Arrow Electric Supply">
             <input type="hidden" name="ponumber" value="000">
             <input type="hidden" name="pobuyer" value="name">
             <input type="hidden" name="pospecialnotes" value="">
@@ -74,12 +74,12 @@
 
                <div class="row" style="width:50%">
                   <div class="col-md-auto">
-                     <b>Acct. Code: {{formpo.poaccountcode(size=1)}}</b>
+                     <b>Acct. Code:</b>  <input type="text"  value="{{vendorf.vendoracccode}}">
                   </div>
                   <div class="col-md-auto"></div>
                   <div class="col-md-auto">
                      <b>Standard Notes:</b>
-                     [PENDING]
+                        <textarea name="vendornotes" style="width:300px;">{{vendornotes}}</textarea>
                   </div>
                </div>
 

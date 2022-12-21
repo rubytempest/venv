@@ -17,7 +17,8 @@ import csv                                                                      
 import os                                                                       #import required to save files into server
 from fractions import Fraction
 import datetime 
-						  
+
+from reportlab.pdfgen import canvas		  
 from PyPDF2 import PdfMerger
 
 
@@ -86,8 +87,9 @@ class VendorsInfo(db.Model):                            #VENDORS MODELS
     vendoroknexus = db.Column(db.Boolean, default = False)
     vendortxnexus = db.Column(db.Boolean, default = False)
     vendornotes = db.Column(db.Text)
+    vendoracccode = db.Column(db.String(100))
  
-    def __init__(self, vendorname, vendornumber, vendoraddress1, vendoraddress2, vendorcity, vendorsate, vendorzipcode, vendorcontact, vendorphone, vendormemail, vendortaxrate, vendorpaymentterm, vendorcostcode, vendoroknexus, vendortxnexus, vendornotes):
+    def __init__(self, vendorname, vendornumber, vendoraddress1, vendoraddress2, vendorcity, vendorsate, vendorzipcode, vendorcontact, vendorphone, vendormemail, vendortaxrate, vendorpaymentterm, vendorcostcode, vendoroknexus, vendortxnexus, vendornotes, vendoracccode):
         self.vendorname = vendorname
         self.vendornumber = vendornumber
         self.vendoraddress1 = vendoraddress1
@@ -104,6 +106,7 @@ class VendorsInfo(db.Model):                            #VENDORS MODELS
         self.vendoroknexus = vendoroknexus
         self.vendortxnexus = vendortxnexus
         self.vendornotes = vendornotes
+        self.vendoracccode = vendoracccode
 
 
 class LocationInfo(db.Model):           #LOCATION MODEL
@@ -979,7 +982,7 @@ def poitemscp():
         today = date.today()
         required=today + datetime.timedelta(days=7)
         hide = 1
-        vendor = VendorsInfo.query.filter_by(vendorname="Airgas USA LLC").first()
+        vendor = VendorsInfo.query.filter_by(vendorname="Broken Arrow Electric Supply").first()
         shipto = LocationInfo.query.filter_by(locationname="Battle Horse").first()
         buyer = current_user.name
         specialnotes = ""
@@ -1003,12 +1006,14 @@ def poitemscp():
         else:
             onsitecontact1 = [[".",".","."],[".",".","."]]
 
-        formpo.povendor.choices = [(povendor.vendorname) for povendor in VendorsInfo.query.all()]  #query to populate vendors box
+        formpo.povendor.choices = ['---']+[(povendor.vendorname) for povendor in VendorsInfo.query.all()]  #query to populate vendors box
         formpo.poshipto.choices = [(poshipto.locationname) for poshipto in LocationInfo.query.all()]
         formpo.pobuyer.choices = [current_user.name] + [(pobuyer.purchasername) for pobuyer in PurchasersInfo.query.all()]
  
+        vendorf = VendorsInfo.query.filter_by(vendorname="Broken Arrow Electric Supply").first()
 
-        return render_template("poitemscp.html", onsitecontact1=onsitecontact1, hide=hide, form=form, formpo=formpo, nextpo=nextpo, vendor=vendor, shipto=shipto, buyer=buyer, today=today)
+
+        return render_template("poitemscp.html", vendorf=vendorf, onsitecontact1=onsitecontact1, hide=hide, form=form, formpo=formpo, nextpo=nextpo, vendor=vendor, shipto=shipto, buyer=buyer, today=today)
 
     if request.method == 'POST':
         jobnumber = request.form['bomjobnumber']
@@ -1020,7 +1025,6 @@ def poitemscp():
         form.bomjobnumber.choices = [(bomjobnumber.locationjobnumber) for bomjobnumber in LocationInfo.query.filter(LocationInfo.locationname != "INACTIVE").order_by(LocationInfo.locationjobnumber.asc()).all()]
         vendor = request.form['povendor']
         buyer = request.form['pobuyer']
-        print(vendor)
 
         today=date.today()
         required=today + datetime.timedelta(days=7)
@@ -1031,12 +1035,14 @@ def poitemscp():
         poitems = POItemsInfo.query.filter(POItemsInfo.poitempo == "90865092834750982").all()
         secondshipto = request.form['poshipto']
 
-        print(specialnotes)
+        print(jobnumber, secondshipto)
 
         shipto = LocationInfo.query.filter_by(locationjobnumber=jobnumber).first()
 
         if secondshipto != '-':
             shipto = LocationInfo.query.filter_by(locationjobnumber=secondshipto).first()
+
+        print(shipto.locationjobnumber)
 
         ponumber = request.form['ponumber']
         if ponumber == "000":
@@ -1066,9 +1072,12 @@ def poitemscp():
         formpo.povendor.choices = [(povendor.vendorname) for povendor in VendorsInfo.query.all()]  #query to populate vendors box
         formpo.poshipto.choices = [jobnumber]+[(poshipto.locationjobnumber) for poshipto in LocationInfo.query.filter(LocationInfo.locationname != "INACTIVE").order_by(LocationInfo.locationjobnumber.asc()).all()] 
         formpo.pobuyer.choices = [current_user.name] + [(pobuyer.purchasername) for pobuyer in PurchasersInfo.query.all()]
-        formpo.povendornotes.choices = [(povendornotes.vendornotes) for povendornotes in VendorsInfo.query.all()]  #query to populate vendors box
+        formpo.povendornotes.choices = [(povendornotes.vendornotes) for povendornotes in VendorsInfo.query.filter(VendorsInfo.vendorname == vendor).all()]  #query to populate vendors box
+        vendorf = VendorsInfo.query.filter_by(vendorname=vendor).first()
+        print(vendorf)
+        vendornotes = vendorf.vendornotes
 
-        return render_template("poitemscp.html", shippingnotes=shippingnotes, specialnotes=specialnotes, required=required, onsitecontact1=onsitecontact1, buyer=buyer, hide=hide, vendor=vendor, form=form, formpo=formpo, poitems=poitems, nextpo=nextpo, shipto=shipto, today=today, pojob=jobnumber)
+        return render_template("poitemscp.html", vendorf=vendorf, vendornotes=vendornotes, shippingnotes=shippingnotes, specialnotes=specialnotes, required=required, onsitecontact1=onsitecontact1, buyer=buyer, hide=hide, vendor=vendor, form=form, formpo=formpo, poitems=poitems, nextpo=nextpo, shipto=shipto, today=today, pojob=jobnumber)
 
 ### POITEMSCPPEDIT.HTML
 
@@ -1607,8 +1616,16 @@ def insertvendor():
         vendormemail = request.form['vendormemail']
         vendortaxrate = request.form['vendortaxrate']
         vendornotes = request.form['vendornotes']
+        vendoracccode = request.form['vendoracccode']
  
-        my_data = VendorsInfo(vendorname, vendornumber, vendoraddress1, vendoraddress2, vendorcity, vendorstate, vendorzipcode, vendorcontact, vendorphone, vendormemail, vendortaxrate, vendornotes)
+        vendorpaymentterm = request.form['vendorpaymentterm']
+        vendorcostcode = 0
+        vendoroknexus = 0
+        vendortxnexus = 0
+
+        print(vendoracccode)
+
+        my_data = VendorsInfo(vendorname, vendornumber, vendoraddress1, vendoraddress2, vendorcity, vendorstate, vendorzipcode, vendorcontact, vendorphone, vendormemail, vendortaxrate, vendorpaymentterm, vendorcostcode, vendoroknexus, vendortxnexus, vendornotes, vendoracccode)
         db.session.add(my_data)
         db.session.commit()
  
@@ -1633,6 +1650,8 @@ def updatevendor():
         my_data.vendormemail = request.form['vendormemail']
         my_data.vendortaxrate = request.form['vendortaxrate']
         my_data.vendornotes = request.form['vendornotes']
+        my_data.vendoracccode = request.form['vendoracccode']
+        my_data.vendorpaymentterm = request.form['vendorpaymentterm']
  
         db.session.commit()
  
@@ -2532,6 +2551,76 @@ def isti_po_format1(ponumber):
     duedate = due.strftime('%m-%d-%Y')
 
     return render_template("isti_po_format1.html" , duedate=duedate, poitems = all_data, po=po, vendor=vendor, shipto=shipto, buyer=buyer, subtotal=subtotal, taxed=taxed, total=total, notes=notes, podate=podate)
+
+### GENERATING REPORTLAB PDF FILE ###
+
+@app.route('/po_report_pdf/<ponumber>')
+def po_report_pdf(ponumber):
+    po = POInfo.query.filter_by(ponumber=ponumber).first()
+    vendor = VendorsInfo.query.filter_by(vendorname=po.povendor).first()
+    shipto = LocationInfo.query.filter_by(locationname=po.poshipto).first()
+    contact = PurchasersInfo.query.filter_by(purchaserjob=shipto.locationjobnumber).first()
+
+    my_canvas = canvas.Canvas("hello.pdf")
+    my_canvas.drawString(80, 792, "ISTI Plant Services")
+    my_canvas.drawString(80, 777, "17207 E. 21st Street")
+    my_canvas.drawString(80, 762, "Tulsa, OK 74134")
+    my_canvas.drawString(80, 747, "AP@istips.com")
+    my_canvas.drawString(80, 732, "P. (918) 234-1097 | F. (918) 438-2536")
+
+    my_canvas.drawString(480, 792, "Purchase Order")
+    my_canvas.drawString(480, 777, "Date    PO No.")
+    my_canvas.drawString(460, 762, "{}    {}".format(po.pocreated , po.ponumber))  #change date format to american
+
+    my_canvas.drawString(30,717, "Vendor")
+    my_canvas.drawString(30,702, "{}".format(po.povendor))
+    my_canvas.drawString(30,687, "{}".format(vendor.vendoraddress1))
+    my_canvas.drawString(30,672, "{},{} {}".format(vendor.vendorcity, vendor.vendorstate, vendor.vendorzipcode))
+    ##
+    my_canvas.drawString(30,612, "Contact:")
+    my_canvas.drawString(100,612, "{}".format(vendor.vendorcontact))
+    my_canvas.drawString(30,597, "Phone/Fax:")
+    my_canvas.drawString(100,597, "{}".format(vendor.vendorphone))
+    my_canvas.drawString(30,581, "E-Mail Address:")
+    my_canvas.drawString(100,581, "{}".format(vendor.vendormemail))
+    my_canvas.drawString(30,566, "Taxable:")
+    if po.potaxrate > 0:
+        my_canvas.drawString(80,566, "Yes")
+    else:
+        my_canvas.drawString(80,566, "No")
+    my_canvas.drawString(100,566, "Due:")
+    my_canvas.drawString(120,566, "")
+    my_canvas.drawString(140,566, "Terms:")
+    my_canvas.drawString(155,566, "{}".format(vendor.vendorpaymentterm))
+
+
+
+    my_canvas.drawString(350,717, "Shipto")
+    my_canvas.drawString(350,702, "ISTI Plant Services")
+    my_canvas.drawString(350,687, "{}".format(po.poshipto))
+    my_canvas.drawString(350,672, "{},{} {}".format(shipto.locationcity, shipto.locationstate, shipto.locationzipcode))
+    #
+    my_canvas.drawString(350,612, "Shipping/Freight:")
+    my_canvas.drawString(370,612, "Best Way")
+    my_canvas.drawString(390,612, "FOB")
+    my_canvas.drawString(440,612, "Prepaid & Allow")
+    my_canvas.drawString(350,597, "Delivery Contact(s)")
+    my_canvas.drawString(440,597, "{}".format(contact.purchasername))
+    my_canvas.drawString(350,581, "Phone/Fax:")
+    my_canvas.drawString(440,581, "{}".format(contact.purchaserphone))
+    my_canvas.drawString(350,566, "E-Mail Address:")
+    my_canvas.drawString(440,566, "{}".format(contact.purchaseremail))
+
+    my_canvas.drawString(200,550, "Attention Vendor Please See Important Notes Below")
+    #add gray division linehere
+    my_canvas.drawString(30,535, "{}".format(vendor.vendornotes))
+
+
+
+    my_canvas.save()
+
+    return render_template("poitemscp.html")
+
 
 ### GENERATING RECEIVING PDF COPY OF PO ####
 @app.route('/isti_po_format_priceless/<ponumber>')
