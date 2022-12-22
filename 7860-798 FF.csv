@@ -1,2 +1,11 @@
-Vendor,Job,Date,PO No.,Item,Description,Qty.,Rate,Unit,Amount,Tax, ,Shipping
-Fleet Service of Tulsa,Field\Fabrication Job,11/10/2022,7860-798,30NA,some dirty item,12,$5.0,ea.,$60.0,0.1000%,,"Phantom Gas Plant-3014 FM 829 Lenorah,TX 79749"
+Vendor,Job,Date,PO No.,Item,Description,Qty.,Rate,Unit,Amount,Tax, , ,Shipping
+Fleet Service of Tulsa,Field\Fabrication Job,11/10/2022,7860-798,30NA,some dirty itemx,12,$5.0,ea.,$60.0,0.1000%,,,"Bird Creek Fabrication Facility-5555 N. Bird Creek Ave. Catoosa,OK 74015"
+Fleet Service of Tulsa,Field\Fabrication Job,11/10/2022,7860-798,30NA,SOMETHINGo,5,$5.0,ea.,$25.0,0.1000%,,,"Bird Creek Fabrication Facility-5555 N. Bird Creek Ave. Catoosa,OK 74015"
+Fleet Service of Tulsa,Field\Fabrication Job,11/10/2022,7860-798,30NA,TEST ITEMS,66,$89.0,ea.,$5874.0,0.1000%,,,"Bird Creek Fabrication Facility-5555 N. Bird Creek Ave. Catoosa,OK 74015"
+Fleet Service of Tulsa,Field\Fabrication Job,11/10/2022,7860-798,30NA,weakness,44,$98.0,ea.,$4312.0,0.1000%,,,"Bird Creek Fabrication Facility-5555 N. Bird Creek Ave. Catoosa,OK 74015"
+Fleet Service of Tulsa,Field\Fabrication Job,11/10/2022,7860-798,30NA,evilero,98,$89.0,ea.,$8722.0,0.1000%,,,"Bird Creek Fabrication Facility-5555 N. Bird Creek Ave. Catoosa,OK 74015"
+Big Red Fasteners,,12/22/2022,7860-798,NoneAD3, somethingelse,44,$74.0, lb,$3256.0,0.1000%,,,"Bird Creek Fabrication Facility-5555 N. Bird Creek Ave. Catoosa,OK 74015"
+Big Red Fasteners,Field\Fabrication Job,11/10/2022,7860-798,30NA,testaro,54,$45.0,ea.,$2430.0,0.1000%,,,"Bird Creek Fabrication Facility-5555 N. Bird Creek Ave. Catoosa,OK 74015"
+Big Red Fasteners,Field\Fabrication Job,11/10/2022,7860-798,30NA,Evil wreches of doom,7,$49.0,ea.,$343.0,0.1000%,,,"Bird Creek Fabrication Facility-5555 N. Bird Creek Ave. Catoosa,OK 74015"
+Big Red Fasteners,Field\Fabrication Job,11/10/2022,7860-798,30NA,THOSE OTHER THINGS WE LIKED,8,$84.0,ea.,$672.0,0.1000%,,,"Bird Creek Fabrication Facility-5555 N. Bird Creek Ave. Catoosa,OK 74015"
+Big Red Fasteners,Field\Fabrication Job,11/10/2022,7860-798,30NA,stuff we don't need,99,$9.0,ea.,$891.0,0.1000%,,,"Bird Creek Fabrication Facility-5555 N. Bird Creek Ave. Catoosa,OK 74015"

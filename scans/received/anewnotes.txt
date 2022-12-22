@@ -1,0 +1,33 @@
+12/5/2022
+cost code testing for new acccode assign
+replace if sequence for select
+backup new algorithm
+test tabbed navigation on add entry forms
+improved auto refresh algorithm (not suitable select field yet)
+
+12/6/2022
+remove character count limit from notes in database
+run reindent for main app code
+compare and merge development + production databases
+remove idd assignation cap
+remove legacy code from server files
+paper design of new commit rules
+
+12/7/2022
+Fix internal server error on mainscreen
+fix vendor variables not loading properly on main screen
+upload changes to production
+fix vendor edit form accepting wrong input
+set new rule to prevent duplicated vendors
+rearrange vendors not showing in a-z order
+
+12/8/2022
+fix new alert error
+update code to prevent internal server error screen
+test redirect to screen with warning message
+create local notes for relevant events in server
+
+12/9/2022
+review compatibility current html code for new po generation changes
+start migrating from html template to a python template
+

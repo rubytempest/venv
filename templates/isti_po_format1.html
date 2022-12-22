@@ -41,7 +41,7 @@
 
     <tr>
         <td style="width: 127px; text-align: center; "><strong>Revision</strong></td>
-        <td style="width: 127px; text-align: center; "><strong>000</strong></td>
+        <td style="width: 127px; text-align: center; "><strong>{{rev}}</strong></td>
     </tr>
 
     <tr>
@@ -86,7 +86,7 @@
     <td style="width: 81px;" colspan="1" bgcolor="lightgray"><strong>Taxable</strong></td>
     <td style="width: 81px; text-align: center;" colspan="1" bgcolor="yellow"><strong>Yes</strong></td>
     <td style="width: 81px;" bgcolor="lightgray">&nbsp;Due</td>
-    <td style="width: 120px;" colspan="1" bgcolor="yellow" >&nbsp;{{duedate}}</td>
+    <td style="width: 120px;" bgcolor="yellow" >&nbsp;{{duedate}}</td>
     <td style="width: 120px;" bgcolor="lightgray">&nbsp;Terms</td>
     <td style="width: 120px;" ><b>&nbsp;{{vendor.vendorpaymentterm}}</b></td>
     <td style="width: 219px;" bgcolor="lightgray"><strong>E-Mail Address:</strong></td>
@@ -145,6 +145,17 @@
         {% set count.value = count.value + 1 %}
         {% endif %}
     {% endfor%}
+
+
+        <tr>
+            <td style="width: 33px;">&nbsp;</td>
+            <td style="width: 104px;">&nbsp;</td>
+            <td style="width: 1831.23px;" colspan="5">&nbsp;</td>
+            <td style="width: 131px;">&nbsp;</td>
+            <td style="width: 81px;">&nbsp;</td>
+            <td style="width: 254px;" colspan="2">&nbsp;</td>
+        </tr>
+
 
     <tr>
     <td style="width: 33px;">&nbsp;</td>

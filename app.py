@@ -2074,7 +2074,6 @@ def singleprice():
  
     return redirect(url_for('bomitemsv2', ponumber=poitempo))
 
-
 ##EXCELBOMPRICES
 @app.route("/bomexcelprices", methods=["POST","GET"])
 def bomexcelprices():
@@ -2112,7 +2111,6 @@ def bomexcelprices():
     print("receiving pdf copy created")
 
     return redirect(url_for('bomitemsv2', ponumber=ponumber))                                       #return to previous page
-
 
 #BOM FILE PDF TEMPLATE
 @app.route('/bom_pdf', methods = ['GET', 'POST'])
@@ -2182,7 +2180,6 @@ def bom_template(material,bomjobnumber):
         fraction = Fraction(0,1)
         counter=counter+1
         
-
     print(qtotals)
     buyer = current_user
 
@@ -2229,7 +2226,6 @@ def bom_excel(material,bomjobnumber):
     feet=0
     inch=0
     fraction = Fraction(0,1)
-						
 
     for i in unique:
         for full in bom:
@@ -2304,8 +2300,6 @@ def flatfileexport():
             data = [row.poitemvendor,row.poitemjobtype,row.poitemdate,row.poitempo,str(row.poitemjobtypenumber) + str(row.poitemcostcode), row.poitemdescription, row.poitemquantity, "$" + str(row.poitemprice), row.poitemunit, "$" + str(row.poitemtotalprice),"5%" ,"","" , row.poitemjobtype ,row.poitemjobtypenumber, row.poitemcostcode]
             writer.writerow(data)
     
-    flash("FlatFile for " + str(flatfiledate) + " has been generated!")
-
     return send_file('flatfile_' + str(flatfiledate) + '.csv', as_attachment=True)
 
 # FLATFILE GENERATION BY PO-NUMBER
@@ -2317,8 +2311,7 @@ def flatfilepoexport():
     po = POInfo.query.filter_by(ponumber = flatfileponumber).first()
     shipto = LocationInfo.query.filter_by(locationname=po.poshipto).first()
 
-
-    header =  ["Vendor","Job","Date","PO No.","Item","Description","Qty.","Rate","Unit","Amount","Tax"," ","Shipping"]    
+    header =  ["Vendor","Job","Date","PO No.","Item","Description","Qty.","Rate","Unit","Amount","Tax"," "," ","Shipping"]    
 
     with open(str(flatfileponumber) + " FF" + '.csv', 'w', encoding='UTF8', newline='') as f:                      #Generate CSV file, writing mode, dont skip in new line
         writer = csv.writer(f)                                                  #Start writer mode
@@ -2328,7 +2321,7 @@ def flatfilepoexport():
         formattaxrate = format(po.potaxrate, '.4f')                         #Add 4 decimal places to tax rate
         print(formattaxrate)
         for row in poitems:
-            data = [row.poitemvendor, row.poitemjobtype, row.poitemdate.strftime('%m/%d/%Y'),row.poitempo,str(row.poitemjobtypenumber) + str(row.poitemcostcode), row.poitemdescription, row.poitemquantity, "$" + str(row.poitemprice), row.poitemunit, "$" + str(row.poitemtotalprice), str(formattaxrate) + "%", "", shipto.locationname + "-" + shipto.locationaddress + " " + shipto.locationcity + "," + shipto.locationstate + " " + shipto.locationzipcode]
+            data = [row.poitemvendor, row.poitemjobtype, row.poitemdate.strftime('%m/%d/%Y'),row.poitempo,str(row.poitemjobtypenumber) + str(row.poitemcostcode), row.poitemdescription, row.poitemquantity, "$" + str(row.poitemprice), row.poitemunit, "$" + str(row.poitemtotalprice), str(formattaxrate) + "%", "", "", shipto.locationname + "-" + shipto.locationaddress + " " + shipto.locationcity + "," + shipto.locationstate + " " + shipto.locationzipcode]
             writer.writerow(data)
     
     #Code to convert csv file to xlsx
@@ -2521,7 +2514,6 @@ def isti_po_format1(ponumber):
 
     vendor = VendorsInfo.query.filter_by(vendorname=po.povendor).first()
     shipto = LocationInfo.query.filter_by(locationname=po.poshipto).first()
-    #contact = PurchasersInfo.query.filter_by(purchaserjob=shipto.locationjobnumber).first()
     buyer= current_user
 
     notes = JobsInfo.query.filter_by(jobnumber=po.pojob).all()
@@ -2552,8 +2544,15 @@ def isti_po_format1(ponumber):
     else:
         contact = [[".",".","."],[".",".","."]]
 
+    #Code to check for revisions
+    revisionexist = db.session.query(db.exists().where(RevisionsInfo.revisionspo == ponumber)).scalar()
+    if revisionexist:
+        revision = RevisionsInfo.query.filter(RevisionsInfo.revisionspo == ponumber).order_by(RevisionsInfo.revisionnumber.desc()).first()
+        rev = revision.revisionnumber
+    else:
+        rev = "000"
 
-    return render_template("isti_po_format1.html" , buyer=buyer, duedate=duedate, poitems = all_data, po=po, vendor=vendor, shipto=shipto, contact=contact, subtotal=subtotal, taxed=taxed, total=total, notes=notes, podate=podate)
+    return render_template("isti_po_format1.html", rev=rev, buyer=buyer, duedate=duedate, poitems = all_data, po=po, vendor=vendor, shipto=shipto, contact=contact, subtotal=subtotal, taxed=taxed, total=total, notes=notes, podate=podate)
 
 ### GENERATING REPORTLAB PDF FILE ###
 
@@ -2596,8 +2595,6 @@ def po_report_pdf(ponumber):
     my_canvas.drawString(140,566, "Terms:")
     my_canvas.drawString(155,566, "{}".format(vendor.vendorpaymentterm))
 
-
-
     my_canvas.drawString(350,717, "Shipto")
     my_canvas.drawString(350,702, "ISTI Plant Services")
     my_canvas.drawString(350,687, "{}".format(po.poshipto))
@@ -2617,8 +2614,6 @@ def po_report_pdf(ponumber):
     my_canvas.drawString(200,550, "Attention Vendor Please See Important Notes Below")
     #add gray division linehere
     my_canvas.drawString(30,535, "{}".format(vendor.vendornotes))
-
-
 
     my_canvas.save()
 
