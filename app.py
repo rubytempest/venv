@@ -25,10 +25,8 @@ from PyPDF2 import PdfMerger
 UPLOAD_FOLDER = '/temp'
 ALLOWED_EXTENSIONS = { 'xlsx', 'xls', 'csv', 'pdf'}
 
-
 #Create the Flask object
 app = Flask(__name__)
-
 
 #Config to save uploads folder
 app.config['UPLOAD FOLDER'] = UPLOAD_FOLDER
@@ -358,13 +356,10 @@ def load_user(user_id):
 #___START ROUTING INSIDE APP___#
 
 ### ROUTES FOR LOGIN USERS ###
-
-@app.route('/', methods=["POST", "GET"])
+@app.route('/', methods=["POST", "GET"])    #homepage
 @login_required                                                 #request user for login to access this route
 def index():
-    name = current_user.username
     return redirect(url_for('poitemscp'))                   #HOMEPAGE
-
 
 
 ## START RECEIVING ROUTES ##
@@ -381,7 +376,6 @@ def receiving():
     all_data = POInfo.query.order_by(POInfo.id.desc()).all()                        #List of PO retrieved and organize = newest first
     buyer = current_user
     return render_template("receiving.html", pos = all_data, buyer=buyer, nextpo=nextpo)
-
 
 #VIEW RECITEMSV2.HTML
 @app.route("/recitemsv2/<ponumber>", methods=["POST", "GET"])
@@ -728,14 +722,13 @@ def updatelocation():
 def purchasers():
     all_data = PurchasersInfo.query.order_by(PurchasersInfo.purchaserjob.asc()).all()
 
-
     return render_template("purchasers.html", purchasers = all_data)
 
 #DELETE PURCHASER RECORD
 @app.route('/deletepurchaser/<id>/', methods = ['GET', 'POST'])
 def deletepurchaser(id):
-    my_data = LocationInfo.query.get(id)
-
+    my_data = PurchasersInfo.query.get(id)
+    db.session.delete(my_data)
     db.session.commit()
 
     return redirect(url_for('purchasers'))
@@ -1006,12 +999,11 @@ def poitemscp():
         else:
             onsitecontact1 = [[".",".","."],[".",".","."]]
 
-        formpo.povendor.choices = ['---']+[(povendor.vendorname) for povendor in VendorsInfo.query.all()]  #query to populate vendors box
+        formpo.povendor.choices = ['---']+[(povendor.vendorname) for povendor in VendorsInfo.query.order_by(VendorsInfo.vendorname.asc()).all()]  #query to populate vendors box
         formpo.poshipto.choices = [(poshipto.locationname) for poshipto in LocationInfo.query.all()]
         formpo.pobuyer.choices = [current_user.name] + [(pobuyer.purchasername) for pobuyer in PurchasersInfo.query.all()]
  
         vendorf = VendorsInfo.query.filter_by(vendorname="Broken Arrow Electric Supply").first()
-
 
         return render_template("poitemscp.html", vendorf=vendorf, onsitecontact1=onsitecontact1, hide=hide, form=form, formpo=formpo, nextpo=nextpo, vendor=vendor, shipto=shipto, buyer=buyer, today=today)
 
@@ -1069,7 +1061,7 @@ def poitemscp():
         else:
             onsitecontact1 = [[".",".","."],[".",".","."]]
 
-        formpo.povendor.choices = [(povendor.vendorname) for povendor in VendorsInfo.query.all()]  #query to populate vendors box
+        formpo.povendor.choices = [(povendor.vendorname) for povendor in VendorsInfo.query.order_by(VendorsInfo.vendorname.asc()).all()]  #query to populate vendors box
         formpo.poshipto.choices = [jobnumber]+[(poshipto.locationjobnumber) for poshipto in LocationInfo.query.filter(LocationInfo.locationname != "INACTIVE").order_by(LocationInfo.locationjobnumber.asc()).all()] 
         formpo.pobuyer.choices = [current_user.name] + [(pobuyer.purchasername) for pobuyer in PurchasersInfo.query.all()]
         formpo.povendornotes.choices = [(povendornotes.vendornotes) for povendornotes in VendorsInfo.query.filter(VendorsInfo.vendorname == vendor).all()]  #query to populate vendors box
@@ -2529,7 +2521,8 @@ def isti_po_format1(ponumber):
 
     vendor = VendorsInfo.query.filter_by(vendorname=po.povendor).first()
     shipto = LocationInfo.query.filter_by(locationname=po.poshipto).first()
-    buyer = current_user
+    #contact = PurchasersInfo.query.filter_by(purchaserjob=shipto.locationjobnumber).first()
+    buyer= current_user
 
     notes = JobsInfo.query.filter_by(jobnumber=po.pojob).all()
 
@@ -2550,7 +2543,17 @@ def isti_po_format1(ponumber):
     due = po.pocreated + timedelta(days=7)
     duedate = due.strftime('%m-%d-%Y')
 
-    return render_template("isti_po_format1.html" , duedate=duedate, poitems = all_data, po=po, vendor=vendor, shipto=shipto, buyer=buyer, subtotal=subtotal, taxed=taxed, total=total, notes=notes, podate=podate)
+    #On Site Contacts Information
+    contactexist = db.session.query(db.exists().where(PurchasersInfo.purchaserjob == shipto.locationjobnumber)).scalar()
+    if contactexist:
+        contact = PurchasersInfo.query.filter(PurchasersInfo.purchaserjob == shipto.locationjobnumber).order_by(PurchasersInfo.id.asc()).all()
+        empty=[".",".","."]
+        contact.append(empty)
+    else:
+        contact = [[".",".","."],[".",".","."]]
+
+
+    return render_template("isti_po_format1.html" , buyer=buyer, duedate=duedate, poitems = all_data, po=po, vendor=vendor, shipto=shipto, contact=contact, subtotal=subtotal, taxed=taxed, total=total, notes=notes, podate=podate)
 
 ### GENERATING REPORTLAB PDF FILE ###
 
